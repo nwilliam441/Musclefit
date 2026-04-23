@@ -31,7 +31,7 @@ const formatCurrency = (value: number) =>
 
 export function MealPrepForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentStep, setPaymentStep] = useState<1 | 2 | 3>(1);
+  const [submitMessage, setSubmitMessage] = useState<string>("");
   const [form, setForm] = useState<OrderFormState>({
     name: "",
     phone: "",
@@ -50,7 +50,6 @@ export function MealPrepForm() {
   });
 
   const isPaymentReady = form.paymentConfirmed && Boolean(form.paymentReference.trim());
-  const isSubmitUnlocked = paymentStep === 3 && isPaymentReady;
 
   const perBowlTotal = useMemo(() => {
     const salmonCost = form.protein === "Salmon" ? mealData.modifiers.salmonUpcharge : 0;
@@ -62,8 +61,27 @@ export function MealPrepForm() {
 
   const orderTotal = useMemo(() => perBowlTotal * form.quantity, [perBowlTotal, form.quantity]);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const cartItems = useMemo(() => {
+    const items: Array<{ label: string; amount: number }> = [{ label: "Base bowl", amount: mealData.basePrice }];
+
+    if (form.protein === "Salmon") {
+      items.push({ label: "Salmon upgrade", amount: mealData.modifiers.salmonUpcharge });
+    }
+
+    if (form.extraMeat) {
+      items.push({ label: "Extra meat", amount: mealData.modifiers.extraMeat });
+    }
+
+    if (form.extraVeggieOrCarb) {
+      items.push({ label: "Extra veggie/carb", amount: mealData.modifiers.extraVeggieOrCarb });
+    }
+
+    return items;
+  }, [form.protein, form.extraMeat, form.extraVeggieOrCarb]);
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitMessage("");
 
     if (form.pickupType === "scheduled" && (!form.pickupDate || !form.pickupTime)) {
       alert("Please select pickup date and time.");
@@ -80,30 +98,50 @@ export function MealPrepForm() {
         ? "Earliest available pickup"
         : `Scheduled pickup: ${form.pickupDate} at ${form.pickupTime}`;
 
-    const subject = encodeURIComponent(`Meal Prep Order - ${form.name || "Customer"}`);
-    const body = encodeURIComponent(
-      [
-        `Name: ${form.name}`,
-        `Phone: ${form.phone}`,
-        `Protein: ${form.protein}`,
-        `Carb: ${form.carb}`,
-        `Veggies: ${form.veggies}`,
-        `Extra meat: ${form.extraMeat ? "Yes" : "No"}`,
-        `Extra veggie/carb: ${form.extraVeggieOrCarb ? "Yes" : "No"}`,
-        `Quantity: ${form.quantity}`,
-        pickupSummary,
-        `Payment confirmed: ${form.paymentConfirmed ? "Yes" : "No"}`,
-        `Payment reference: ${form.paymentReference}`,
-        `Estimated total: ${formatCurrency(orderTotal)}`,
-        `Notes: ${form.notes || "N/A"}`,
-      ].join("\n")
-    );
-
     setIsSubmitting(true);
-    window.location.href = `mailto:${siteData.orderEmail}?subject=${subject}&body=${body}`;
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/send-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customer: {
+            name: form.name,
+            phone: form.phone,
+          },
+          bowl: {
+            protein: form.protein,
+            carb: form.carb,
+            veggies: form.veggies,
+            extraMeat: form.extraMeat,
+            extraVeggieOrCarb: form.extraVeggieOrCarb,
+            quantity: form.quantity,
+          },
+          pickup: pickupSummary,
+          payment: {
+            confirmed: form.paymentConfirmed,
+            reference: form.paymentReference,
+          },
+          pricing: {
+            perBowlTotal,
+            orderTotal,
+            lineItems: cartItems,
+          },
+          notes: form.notes,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Order submission failed");
+      }
+
+      setSubmitMessage("Paid order submitted successfully. We sent it to the store email.");
+    } catch {
+      setSubmitMessage("Could not send order automatically. Please try again.");
+    } finally {
       setIsSubmitting(false);
-    }, 1200);
+    }
   };
 
   const renderSelectionCards = (
@@ -244,33 +282,34 @@ export function MealPrepForm() {
         </label>
       </fieldset>
 
-      <fieldset className="inline-options">
-        <legend>Payment (Required Before Submit)</legend>
-
-        <div className="payment-stepper" role="list" aria-label="Payment steps">
-          <div className={`payment-step${paymentStep >= 1 ? " active" : ""}${paymentStep > 1 ? " done" : ""}`} role="listitem">
-            <strong>1</strong>
-            <span>Pay</span>
-          </div>
-          <div className={`payment-step${paymentStep >= 2 ? " active" : ""}${paymentStep > 2 ? " done" : ""}`} role="listitem">
-            <strong>2</strong>
-            <span>Confirm Receipt</span>
-          </div>
-          <div className={`payment-step${paymentStep >= 3 ? " active" : ""}${isSubmitUnlocked ? " done" : ""}`} role="listitem">
-            <strong>3</strong>
-            <span>Submit Order</span>
-          </div>
+      <section className="cart-review" aria-live="polite">
+        <h3>
+          <ShoppingCart size={16} aria-hidden="true" /> Review Cart
+        </h3>
+        <ul>
+          {cartItems.map((item) => (
+            <li key={item.label}>
+              <span>{item.label}</span>
+              <span>{formatCurrency(item.amount)}</span>
+            </li>
+          ))}
+          <li>
+            <span>Quantity</span>
+            <span>x{form.quantity}</span>
+          </li>
+        </ul>
+        <div className="cart-totals">
+          <p>Per bowl: {formatCurrency(perBowlTotal)}</p>
+          <p className="total">Order Total: {formatCurrency(orderTotal)}</p>
         </div>
+      </section>
+
+      <fieldset className="inline-options">
+        <legend>Payment (Pay Before Submit)</legend>
 
         {siteData.clover.orderUrl ? (
           <p>
-            <a
-              href={siteData.clover.orderUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-secondary"
-              onClick={() => setPaymentStep(2)}
-            >
+            <a href={siteData.clover.orderUrl} target="_blank" rel="noreferrer" className="btn btn-secondary">
               <CircleDollarSign size={16} aria-hidden="true" /> Pay with Clover
             </a>
           </p>
@@ -278,17 +317,10 @@ export function MealPrepForm() {
           <p className="muted">Add your Clover payment/order URL in site-data to enable direct payment link.</p>
         )}
 
-        {paymentStep === 1 ? (
-          <button type="button" className="btn btn-secondary" onClick={() => setPaymentStep(2)}>
-            I Paid, Continue
-          </button>
-        ) : null}
-
         <label>
           Payment Reference / Receipt ID
           <input
             required
-            disabled={paymentStep < 2}
             value={form.paymentReference}
             onChange={(event) => setForm((prev) => ({ ...prev, paymentReference: event.target.value }))}
             placeholder="Enter payment confirmation number"
@@ -298,30 +330,12 @@ export function MealPrepForm() {
         <label>
           <input
             type="checkbox"
-            disabled={paymentStep < 2}
             checked={form.paymentConfirmed}
             onChange={(event) => setForm((prev) => ({ ...prev, paymentConfirmed: event.target.checked }))}
             required
           />
           I completed payment before placing this order.
         </label>
-
-        {paymentStep === 2 ? (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => {
-              if (!isPaymentReady) {
-                alert("Enter receipt/reference and confirm payment to continue.");
-                return;
-              }
-
-              setPaymentStep(3);
-            }}
-          >
-            Continue to Final Submit
-          </button>
-        ) : null}
       </fieldset>
 
       <label>
@@ -334,23 +348,20 @@ export function MealPrepForm() {
         />
       </label>
 
-      <div className="price-box" aria-live="polite">
-        <p>Per bowl: {formatCurrency(perBowlTotal)}</p>
-        <p className="total">Total: {formatCurrency(orderTotal)}</p>
-      </div>
-
-      {!isSubmitUnlocked ? (
-        <p className="muted">Complete steps 1 and 2 to unlock final order submit.</p>
+      {!isPaymentReady ? (
+        <p className="muted">Pay and confirm receipt/reference to unlock order submission.</p>
       ) : null}
+
+      {submitMessage ? <p className="submit-message">{submitMessage}</p> : null}
 
       <button
         type="submit"
-        disabled={!isSubmitUnlocked}
+        disabled={!isPaymentReady || isSubmitting}
         className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
-        aria-disabled={!isSubmitUnlocked}
+        aria-disabled={!isPaymentReady || isSubmitting}
       >
         <ShoppingCart size={16} aria-hidden="true" />
-        {isSubmitting ? "Preparing Order..." : isSubmitUnlocked ? "Submit Paid Order by Email" : "Complete Payment Steps First"}
+        {isSubmitting ? "Sending Paid Order..." : isPaymentReady ? "Submit Paid Order" : "Pay First to Submit"}
       </button>
     </form>
   );
