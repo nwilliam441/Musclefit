@@ -165,7 +165,8 @@ export function MealPrepForm() {
       });
 
       if (!response.ok) {
-        throw new Error("Checkout preparation failed");
+        const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errorPayload?.error || "Checkout preparation failed");
       }
 
       const data = (await response.json()) as { checkoutUrl?: string };
@@ -175,8 +176,9 @@ export function MealPrepForm() {
       }
 
       window.location.href = data.checkoutUrl;
-    } catch {
-      setSubmitMessage("Could not start checkout. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not start checkout. Please try again.";
+      setSubmitMessage(message);
     } finally {
       setIsSubmitting(false);
     }

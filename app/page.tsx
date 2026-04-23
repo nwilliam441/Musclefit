@@ -29,7 +29,7 @@ export default function Home() {
               <Link href="/smoothies" className="btn btn-secondary">
                 View Smoothies
               </Link>
-              {siteData.clover.enabled ? (
+              {siteData.clover.enabled && (siteData.clover.orderUrl || siteData.clover.embedUrl) ? (
                 <Link href="/order" className="btn landing-btn-checkout">
                   Checkout
                 </Link>

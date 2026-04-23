@@ -42,7 +42,15 @@ export default function OrderPage() {
             </a>
           </p>
         </section>
-      ) : null}
+      ) : (
+        <section className="card">
+          <h2>Checkout Unavailable</h2>
+          <p>
+            Online checkout is not configured yet. Add your Clover URL in <code>lib/site-data.ts</code> under
+            <code> clover.orderUrl</code> (or set <code>clover.embedUrl</code> for an embedded checkout).
+          </p>
+        </section>
+      )}
     </main>
   );
 }
