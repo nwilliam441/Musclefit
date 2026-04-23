@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { siteData } from "@/lib/site-data";
 import "./globals.css";
@@ -6,6 +7,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Muscle Fit Irwin | Meal Prep & Smoothies",
   description: "Simple, fast meal prep and smoothie ordering inside the gym.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -19,7 +25,7 @@ export default function RootLayout({
         <header className="topbar">
           <div className="topbar-inner">
             <Link href="/" className="brand">
-              Muscle Fit Irwin
+              <Image src="/brand/logo-light.svg" alt="Muscle Fit" width={170} height={48} priority className="brand-mark" />
             </Link>
             <nav>
               <ul className="nav-list">

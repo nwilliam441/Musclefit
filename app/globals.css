@@ -80,6 +80,13 @@ a {
   font-size: 1.05rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-mark {
+  width: clamp(130px, 20vw, 170px);
+  height: auto;
 }
 
 .nav-list {
@@ -116,6 +123,31 @@ a {
   padding: 1rem;
   display: grid;
   gap: 1.15rem;
+}
+
+.page-shell > * {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: reveal-in 0.46s ease forwards;
+}
+
+.page-shell > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.page-shell > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.page-shell > *:nth-child(4) {
+  animation-delay: 0.18s;
+}
+
+@keyframes reveal-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero {
@@ -508,6 +540,10 @@ input[type="radio"] {
   .topbar nav {
     width: 100%;
     text-align: center;
+  }
+
+  .brand {
+    justify-content: center;
   }
 
   .nav-list {
