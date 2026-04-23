@@ -1,0 +1,296 @@
+:root {
+  --bg: #f4f4f4;
+  --surface: #ffffff;
+  --ink: #111111;
+  --ink-soft: #3f3f3f;
+  --line: #d8d8d8;
+  --red: #be1e2d;
+  --green: #287a3b;
+  --blue: #255ca8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at top right, #ffffff 0%, #f0f0f0 45%, #ececec 100%);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.45;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(7px);
+}
+
+.topbar-inner {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 0.9rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 1.02rem;
+  letter-spacing: 0.02em;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  font-weight: 700;
+}
+
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding: 1rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.page-shell {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.hero {
+  border: 1px solid #1c1c1c;
+  background: linear-gradient(140deg, #111111 0%, #1d1d1d 55%, #0f0f0f 100%);
+  color: #fafafa;
+  padding: 2rem 1.1rem;
+  border-radius: 16px;
+}
+
+.hero.compact {
+  padding: 1.4rem 1.1rem;
+}
+
+.hero h1 {
+  margin-top: 0.5rem;
+  font-size: clamp(1.7rem, 5.2vw, 2.7rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.hero p {
+  margin-top: 0.7rem;
+  max-width: 54ch;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  color: #f2f2f2;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.cta-row {
+  margin-top: 1.2rem;
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.62rem 1rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-secondary {
+  border-color: #e2e2e2;
+  color: #fff;
+  background: transparent;
+}
+
+.section-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.two-col {
+  grid-template-columns: 1fr;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.card h2 {
+  margin-bottom: 0.45rem;
+}
+
+.accent-red {
+  border-left: 5px solid var(--red);
+}
+
+.accent-green {
+  border-left: 5px solid var(--green);
+}
+
+.category-block {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.menu-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+}
+
+.smoothie-card h3 {
+  color: var(--blue);
+  margin-bottom: 0.2rem;
+}
+
+.ingredients {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.calories {
+  margin-top: 0.5rem;
+  font-weight: 700;
+}
+
+.addons strong {
+  color: var(--red);
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.form-grid label,
+.form-grid fieldset {
+  display: grid;
+  gap: 0.35rem;
+  border: none;
+}
+
+.inline-options {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.6rem;
+}
+
+.inline-options legend {
+  font-weight: 700;
+  padding: 0 0.25rem;
+}
+
+.inline-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #bebebe;
+  border-radius: 9px;
+  padding: 0.6rem 0.65rem;
+  font: inherit;
+  background: #fff;
+}
+
+.pickup-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.muted {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.price-box {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #fcfcfc;
+}
+
+.total {
+  margin-top: 0.25rem;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.info-panel ul {
+  margin: 0.5rem 0 0.8rem 1rem;
+}
+
+.info-panel h3 {
+  margin-top: 0.6rem;
+  margin-bottom: 0.2rem;
+}
+
+@media (min-width: 780px) {
+  .page-shell {
+    padding: 1.4rem;
+    gap: 1.15rem;
+  }
+
+  .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .section-grid.two-col {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  }
+
+  .pickup-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
