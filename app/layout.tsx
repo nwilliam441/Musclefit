@@ -25,9 +25,14 @@ export default function RootLayout({
         <header className="topbar">
           <div className="topbar-inner">
             <Link href="/" className="brand">
+              <span className="brand-badge">MIF</span>
+              <span className="brand-text">
+                <strong>Muscle Fit</strong>
+                <small>Performance Fuel</small>
+              </span>
               <Image src="/brand/logo-light.svg" alt="Muscle Fit" width={170} height={48} priority className="brand-mark" />
             </Link>
-            <nav>
+            <nav className="topnav">
               <ul className="nav-list">
                 <li>
                   <Link href="/meal-prep">Meal Prep</Link>
