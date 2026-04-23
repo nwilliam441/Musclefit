@@ -1,4 +1,19 @@
+import { Bolt, Cherry, Leaf } from "lucide-react";
 import { siteData } from "@/lib/site-data";
+
+function getSmoothieIcon(ingredients: readonly string[]) {
+  const combined = ingredients.join(" ").toLowerCase();
+
+  if (combined.includes("berry") || combined.includes("straw") || combined.includes("blue")) {
+    return <Cherry size={16} aria-hidden="true" />;
+  }
+
+  if (combined.includes("kale") || combined.includes("spinach") || combined.includes("green")) {
+    return <Leaf size={16} aria-hidden="true" />;
+  }
+
+  return <Bolt size={16} aria-hidden="true" />;
+}
 
 export default function SmoothiesPage() {
   return (
@@ -13,12 +28,20 @@ export default function SmoothiesPage() {
 
       <section className="section-grid">
         {siteData.smoothies.categories.map((category) => (
-          <div key={category.name} className="category-block">
+          <div
+            key={category.name}
+            className={`category-block ${
+              category.name === "Tropical" ? "category-tropical" : "category-clean-fuel"
+            }`}
+          >
             <h2>{category.name}</h2>
             <div className="menu-grid">
               {category.items.map((item) => (
                 <article key={item.name} className="card smoothie-card">
-                  <h3>{item.name}</h3>
+                  <h3>
+                    <span className="item-icon">{getSmoothieIcon(item.ingredients)}</span>
+                    {item.name}
+                  </h3>
                   <p className="ingredients">{item.ingredients.join(", ")}</p>
                   <p className="calories">{item.calories} Cal</p>
                 </article>

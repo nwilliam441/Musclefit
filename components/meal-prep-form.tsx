@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { Beef, Check, Clock3, Leaf, Plus, ShoppingCart, Wheat } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 
 type OrderFormState = {
@@ -27,6 +28,7 @@ const formatCurrency = (value: number) =>
   }).format(value);
 
 export function MealPrepForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<OrderFormState>({
     name: "",
     phone: "",
@@ -82,7 +84,45 @@ export function MealPrepForm() {
       ].join("\n")
     );
 
+    setIsSubmitting(true);
     window.location.href = `mailto:${siteData.orderEmail}?subject=${subject}&body=${body}`;
+    setTimeout(() => {
+      setIsSubmitting(false);
+    }, 1200);
+  };
+
+  const renderSelectionCards = (
+    group: "protein" | "carb" | "veggies",
+    items: readonly string[],
+    icon: React.ReactNode
+  ) => {
+    return (
+      <div className="selection-group">
+        <p className="selection-title">
+          <span className="item-icon">{icon}</span>
+          {group === "protein" ? "Protein" : group === "carb" ? "Carb" : "Veggies"}
+        </p>
+        <div className="selection-grid" role="radiogroup" aria-label={group}>
+          {items.map((item) => {
+            const selected = form[group] === item;
+            const displayName = item === "Salmon" ? `${item} (+${formatCurrency(mealData.modifiers.salmonUpcharge)})` : item;
+
+            return (
+              <button
+                key={item}
+                type="button"
+                className={`selection-card${selected ? " selected" : ""}`}
+                onClick={() => setForm((prev) => ({ ...prev, [group]: item }))}
+                aria-pressed={selected}
+              >
+                <span>{displayName}</span>
+                {selected ? <Check size={15} aria-hidden="true" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -110,38 +150,9 @@ export function MealPrepForm() {
         />
       </label>
 
-      <label>
-        Protein
-        <select value={form.protein} onChange={(event) => setForm((prev) => ({ ...prev, protein: event.target.value }))}>
-          {mealData.proteins.map((protein) => (
-            <option key={protein} value={protein}>
-              {protein}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Carb
-        <select value={form.carb} onChange={(event) => setForm((prev) => ({ ...prev, carb: event.target.value }))}>
-          {mealData.carbs.map((carb) => (
-            <option key={carb} value={carb}>
-              {carb}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Veggies
-        <select value={form.veggies} onChange={(event) => setForm((prev) => ({ ...prev, veggies: event.target.value }))}>
-          {mealData.veggies.map((veggie) => (
-            <option key={veggie} value={veggie}>
-              {veggie}
-            </option>
-          ))}
-        </select>
-      </label>
+      {renderSelectionCards("protein", mealData.proteins, <Beef size={16} aria-hidden="true" />)}
+      {renderSelectionCards("carb", mealData.carbs, <Wheat size={16} aria-hidden="true" />)}
+      {renderSelectionCards("veggies", mealData.veggies, <Leaf size={16} aria-hidden="true" />)}
 
       <label>
         Quantity
@@ -162,7 +173,7 @@ export function MealPrepForm() {
             checked={form.pickupType === "asap"}
             onChange={() => setForm((prev) => ({ ...prev, pickupType: "asap" }))}
           />
-          Earliest available
+          <Clock3 size={15} aria-hidden="true" /> Earliest available
         </label>
         <label>
           <input
@@ -171,7 +182,7 @@ export function MealPrepForm() {
             checked={form.pickupType === "scheduled"}
             onChange={() => setForm((prev) => ({ ...prev, pickupType: "scheduled" }))}
           />
-          Pick a day/time
+          <Clock3 size={15} aria-hidden="true" /> Pick a day/time
         </label>
       </fieldset>
 
@@ -206,7 +217,7 @@ export function MealPrepForm() {
             checked={form.extraMeat}
             onChange={(event) => setForm((prev) => ({ ...prev, extraMeat: event.target.checked }))}
           />
-          Extra meat (+{formatCurrency(mealData.modifiers.extraMeat)})
+          <Plus size={15} aria-hidden="true" /> Extra meat (+{formatCurrency(mealData.modifiers.extraMeat)})
         </label>
         <label>
           <input
@@ -214,7 +225,7 @@ export function MealPrepForm() {
             checked={form.extraVeggieOrCarb}
             onChange={(event) => setForm((prev) => ({ ...prev, extraVeggieOrCarb: event.target.checked }))}
           />
-          Extra veggie/carb (+{formatCurrency(mealData.modifiers.extraVeggieOrCarb)})
+          <Plus size={15} aria-hidden="true" /> Extra veggie/carb (+{formatCurrency(mealData.modifiers.extraVeggieOrCarb)})
         </label>
       </fieldset>
 
@@ -233,8 +244,9 @@ export function MealPrepForm() {
         <p className="total">Total: {formatCurrency(orderTotal)}</p>
       </div>
 
-      <button type="submit" className="btn btn-primary">
-        Submit Order by Email
+      <button type="submit" className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}>
+        <ShoppingCart size={16} aria-hidden="true" />
+        {isSubmitting ? "Preparing Order..." : "Submit Order by Email"}
       </button>
     </form>
   );
