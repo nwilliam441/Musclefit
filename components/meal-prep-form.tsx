@@ -48,6 +48,8 @@ export function MealPrepForm() {
     notes: "",
   });
 
+  const isPaymentReady = form.paymentConfirmed && Boolean(form.paymentReference.trim());
+
   const perBowlTotal = useMemo(() => {
     const salmonCost = form.protein === "Salmon" ? mealData.modifiers.salmonUpcharge : 0;
     const meatCost = form.extraMeat ? mealData.modifiers.extraMeat : 0;
@@ -288,9 +290,18 @@ export function MealPrepForm() {
         <p className="total">Total: {formatCurrency(orderTotal)}</p>
       </div>
 
-      <button type="submit" className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}>
+      {!isPaymentReady ? (
+        <p className="muted">Complete payment and add your receipt/reference to unlock final order submit.</p>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={!isPaymentReady}
+        className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
+        aria-disabled={!isPaymentReady}
+      >
         <ShoppingCart size={16} aria-hidden="true" />
-        {isSubmitting ? "Preparing Order..." : "Submit Order by Email"}
+        {isSubmitting ? "Preparing Order..." : isPaymentReady ? "Submit Paid Order by Email" : "Pay First to Submit"}
       </button>
     </form>
   );

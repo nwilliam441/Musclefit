@@ -235,6 +235,13 @@ a {
   background: #9b2c2c;
 }
 
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.55;
+}
+
 .btn-secondary {
   background: transparent;
   border: 1px solid var(--border);
