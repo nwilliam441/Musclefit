@@ -18,7 +18,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section-grid">
+      <section className="section-grid cols-3">
         <article className="card">
           <h2>What We Offer</h2>
           <p>
