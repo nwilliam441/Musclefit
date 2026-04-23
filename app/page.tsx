@@ -40,8 +40,8 @@ export default function Home() {
           <div className="landing-art-panel">
             <div className="landing-art-wrap">
               <Image
-                src="/brand/smooth monster.png"
-                alt="Muscle Fit mascot"
+                src="/brand/Mascot logo.png"
+                alt="Muscle Fit mascot logo"
                 width={420}
                 height={420}
                 className="landing-mascot"

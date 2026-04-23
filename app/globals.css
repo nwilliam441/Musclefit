@@ -363,15 +363,19 @@ a {
 }
 
 .landing-art-wrap {
+  width: min(82vw, 360px);
   border-radius: 1.4rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.55);
-  padding: 0.6rem;
+  padding: 0.7rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
 }
 
 .landing-mascot {
-  width: min(76vw, 340px);
+  width: 100%;
+  max-width: 320px;
   height: auto;
   filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.65));
 }
