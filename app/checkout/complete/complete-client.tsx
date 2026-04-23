@@ -42,7 +42,7 @@ export default function CheckoutCompleteClient({ orderToken, detectedReference, 
       <section className="hero compact">
         <p className="eyebrow">Checkout Complete</p>
         <h1>Finalize Your Paid Order</h1>
-        <p>If Clover returns a payment ID, your order is submitted automatically below.</p>
+        <p>If checkout returns a payment ID, your order is submitted automatically below.</p>
       </section>
 
       <section className="card">
@@ -53,17 +53,17 @@ export default function CheckoutCompleteClient({ orderToken, detectedReference, 
         {status === "sending" ? <p>Finalizing order and sending emails...</p> : null}
 
         {status === "error" ? (
-          <p className="muted">Could not finalize automatically. Enter your Clover receipt/payment ID and submit below.</p>
+          <p className="muted">Could not finalize automatically. Enter your receipt/payment ID and submit below.</p>
         ) : null}
 
         {!detectedReference && status !== "success" ? (
           <div className="checkout-complete-form">
             <label>
-              Clover Receipt / Payment ID
+              Receipt / Payment ID
               <input
                 value={manualRef}
                 onChange={(event) => setManualRef(event.target.value)}
-                placeholder="Enter Clover payment reference"
+                placeholder="Enter payment reference"
               />
             </label>
             <button

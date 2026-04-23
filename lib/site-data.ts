@@ -9,7 +9,7 @@ export const siteData = {
     enabled: true,
     orderUrl: "",
     embedUrl: "",
-    embedAllowedNote: "If Clover blocks embedding, use the external order link instead.",
+    embedAllowedNote: "If embedded checkout is blocked, use the external checkout link instead.",
   },
   mealPrep: {
     basePrice: 12.5,

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { siteData } from "@/lib/site-data";
 
@@ -5,21 +6,36 @@ export default function Home() {
   return (
     <main className="page-shell">
       <section className="hero">
-        <p className="eyebrow">Meal Prep + Smoothies</p>
-        <h1>{siteData.tagline}</h1>
-        <p>{siteData.locationBlurb}</p>
-        <div className="cta-row">
-          <Link href="/meal-prep" className="btn btn-primary">
-            Order Meal Prep
-          </Link>
-          <Link href="/smoothies" className="btn btn-secondary">
-            View Smoothies
-          </Link>
-          {siteData.clover.enabled ? (
-            <Link href="/order" className="btn btn-primary">
-              Order With Clover
-            </Link>
-          ) : null}
+        <div className="hero-home">
+          <div className="hero-content">
+            <p className="eyebrow">Meal Prep + Smoothies</p>
+            <h1>{siteData.tagline}</h1>
+            <p>{siteData.locationBlurb}</p>
+            <div className="cta-row">
+              <Link href="/meal-prep" className="btn btn-primary">
+                Order Meal Prep
+              </Link>
+              <Link href="/smoothies" className="btn btn-secondary">
+                View Smoothies
+              </Link>
+              {siteData.clover.enabled ? (
+                <Link href="/order" className="btn btn-primary">
+                  Checkout
+                </Link>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="hero-art">
+            <Image
+              src="/brand/smooth monster.png"
+              alt="Smooth Monster mascot"
+              width={420}
+              height={420}
+              priority
+              className="monster-image"
+            />
+          </div>
         </div>
       </section>
 

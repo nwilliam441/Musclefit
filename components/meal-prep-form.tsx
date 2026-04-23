@@ -143,7 +143,7 @@ export function MealPrepForm() {
     }
 
     setCartOrder(nextOrder);
-    setSubmitMessage("Cart ready. Continue to Clover payment.");
+    setSubmitMessage("Cart ready. Continue to checkout.");
   };
 
   const onCheckout = async () => {
@@ -176,7 +176,7 @@ export function MealPrepForm() {
 
       window.location.href = data.checkoutUrl;
     } catch {
-      setSubmitMessage("Could not start Clover checkout. Please try again.");
+      setSubmitMessage("Could not start checkout. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -371,11 +371,9 @@ export function MealPrepForm() {
           onClick={onCheckout}
         >
           <CircleDollarSign size={16} aria-hidden="true" />
-          {isSubmitting ? "Redirecting to Clover..." : "Proceed to Clover Checkout"}
+          {isSubmitting ? "Redirecting to Checkout..." : "Proceed to Checkout"}
         </button>
       </div>
-
-      {!siteData.clover.orderUrl ? <p className="muted">Add Clover order URL in site data to enable checkout redirect.</p> : null}
 
       {submitMessage ? <p className="submit-message">{submitMessage}</p> : null}
     </form>

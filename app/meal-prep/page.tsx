@@ -31,10 +31,10 @@ export default function MealPrepPage() {
           <h3>Veggies</h3>
           <p>{siteData.mealPrep.veggies.join(", ")}</p>
 
-          <p className="muted">Build your bowl, add to cart, then continue to Clover. After payment, order and receipt emails are sent automatically.</p>
+          <p className="muted">Build your bowl, add to cart, then continue to checkout. After payment, order and receipt emails are sent automatically.</p>
           {siteData.clover.enabled ? (
             <p>
-              Prefer Clover? <Link href="/order">Use Clover ordering</Link>.
+              Prefer checkout now? <Link href="/order">Open checkout page</Link>.
             </p>
           ) : null}
         </aside>
