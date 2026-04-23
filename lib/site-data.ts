@@ -5,6 +5,12 @@ export const siteData = {
   orderEmail: "orders@example.com",
   instagramUrl: "https://instagram.com/MuscleFit_IrwinSmoothies",
   locationBlurb: "Inside the gym. Fast pickup. Built for training days.",
+  clover: {
+    enabled: true,
+    orderUrl: "",
+    embedUrl: "",
+    embedAllowedNote: "If Clover blocks embedding, use the external order link instead.",
+  },
   mealPrep: {
     basePrice: 12.5,
     cutoffText: "Orders are due Wednesday at 5:00 PM (1700) for the following week.",

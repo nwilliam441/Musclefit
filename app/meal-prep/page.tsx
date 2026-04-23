@@ -1,4 +1,5 @@
 import { MealPrepForm } from "@/components/meal-prep-form";
+import Link from "next/link";
 import { siteData } from "@/lib/site-data";
 
 export default function MealPrepPage() {
@@ -31,6 +32,11 @@ export default function MealPrepPage() {
           <p>{siteData.mealPrep.veggies.join(", ")}</p>
 
           <p className="muted">Orders submit through your email app for now. Update order email in the editable data file.</p>
+          {siteData.clover.enabled ? (
+            <p>
+              Prefer Clover? <Link href="/order">Use Clover ordering</Link>.
+            </p>
+          ) : null}
         </aside>
       </section>
     </main>

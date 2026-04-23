@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { siteData } from "@/lib/site-data";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,6 +29,11 @@ export default function RootLayout({
                 <li>
                   <Link href="/smoothies">Smoothies</Link>
                 </li>
+                {siteData.clover.enabled ? (
+                  <li>
+                    <Link href="/order">Order</Link>
+                  </li>
+                ) : null}
               </ul>
             </nav>
           </div>

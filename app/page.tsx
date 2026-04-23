@@ -15,6 +15,11 @@ export default function Home() {
           <Link href="/smoothies" className="btn btn-secondary">
             View Smoothies
           </Link>
+          {siteData.clover.enabled ? (
+            <Link href="/order" className="btn btn-primary">
+              Order With Clover
+            </Link>
+          ) : null}
         </div>
       </section>
 
