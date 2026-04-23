@@ -11,7 +11,23 @@ Simple, mobile-first website for gym meal prep and smoothies.
 - Pickup options:
 	- Earliest available
 	- Pick a day/time
-- Email-based order submission (opens mail app)
+- Cart-first meal prep checkout flow:
+	- Build meal and add/update cart
+	- Redirect to Clover for payment
+	- Return to checkout completion page
+	- Auto-send paid order email to store and receipt email to customer
+
+## Checkout And Email Setup
+
+Create `.env.local` from `.env.example` and set:
+
+- `RESEND_API_KEY`
+- `ORDER_FROM_EMAIL`
+- `ORDER_TO_EMAIL`
+- `ORDER_SIGNING_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
+Also set your Clover URL in `lib/site-data.ts` under `clover.orderUrl`.
 
 ## Single Editable Menu Source
 

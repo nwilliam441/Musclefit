@@ -1,11 +1,12 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Beef, Check, CircleDollarSign, Clock3, Leaf, Plus, ShoppingCart, Wheat } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 
 type OrderFormState = {
   name: string;
+  email: string;
   phone: string;
   protein: string;
   carb: string;
@@ -16,8 +17,29 @@ type OrderFormState = {
   pickupTime: string;
   extraMeat: boolean;
   extraVeggieOrCarb: boolean;
-  paymentConfirmed: boolean;
-  paymentReference: string;
+  notes: string;
+};
+
+type CheckoutOrder = {
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  bowl: {
+    protein: string;
+    carb: string;
+    veggies: string;
+    extraMeat: boolean;
+    extraVeggieOrCarb: boolean;
+    quantity: number;
+  };
+  pickup: string;
+  pricing: {
+    perBowlTotal: number;
+    orderTotal: number;
+    lineItems: Array<{ label: string; amount: number }>;
+  };
   notes: string;
 };
 
@@ -31,9 +53,11 @@ const formatCurrency = (value: number) =>
 
 export function MealPrepForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<string>("");
+  const [cartOrder, setCartOrder] = useState<CheckoutOrder | null>(null);
+  const [submitMessage, setSubmitMessage] = useState("");
   const [form, setForm] = useState<OrderFormState>({
     name: "",
+    email: "",
     phone: "",
     protein: mealData.proteins[0],
     carb: mealData.carbs[0],
@@ -44,12 +68,8 @@ export function MealPrepForm() {
     pickupTime: "",
     extraMeat: false,
     extraVeggieOrCarb: false,
-    paymentConfirmed: false,
-    paymentReference: "",
     notes: "",
   });
-
-  const isPaymentReady = form.paymentConfirmed && Boolean(form.paymentReference.trim());
 
   const perBowlTotal = useMemo(() => {
     const salmonCost = form.protein === "Salmon" ? mealData.modifiers.salmonUpcharge : 0;
@@ -79,18 +99,12 @@ export function MealPrepForm() {
     return items;
   }, [form.protein, form.extraMeat, form.extraVeggieOrCarb]);
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const buildCheckoutOrder = (): CheckoutOrder | null => {
     setSubmitMessage("");
 
     if (form.pickupType === "scheduled" && (!form.pickupDate || !form.pickupTime)) {
       alert("Please select pickup date and time.");
-      return;
-    }
-
-    if (!form.paymentConfirmed || !form.paymentReference.trim()) {
-      alert("Payment must be completed first. Add your payment reference before submitting.");
-      return;
+      return null;
     }
 
     const pickupSummary =
@@ -98,57 +112,77 @@ export function MealPrepForm() {
         ? "Earliest available pickup"
         : `Scheduled pickup: ${form.pickupDate} at ${form.pickupTime}`;
 
+    return {
+      customer: {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+      },
+      bowl: {
+        protein: form.protein,
+        carb: form.carb,
+        veggies: form.veggies,
+        extraMeat: form.extraMeat,
+        extraVeggieOrCarb: form.extraVeggieOrCarb,
+        quantity: form.quantity,
+      },
+      pickup: pickupSummary,
+      pricing: {
+        perBowlTotal,
+        orderTotal,
+        lineItems: cartItems,
+      },
+      notes: form.notes,
+    };
+  };
+
+  const onAddToCart = () => {
+    const nextOrder = buildCheckoutOrder();
+    if (!nextOrder) {
+      return;
+    }
+
+    setCartOrder(nextOrder);
+    setSubmitMessage("Cart ready. Continue to Clover payment.");
+  };
+
+  const onCheckout = async () => {
+    if (!cartOrder) {
+      alert("Add your order to cart first.");
+      return;
+    }
+
     setIsSubmitting(true);
+    setSubmitMessage("");
+
     try {
-      const response = await fetch("/api/send-order", {
+      const response = await fetch("/api/orders/prepare", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          customer: {
-            name: form.name,
-            phone: form.phone,
-          },
-          bowl: {
-            protein: form.protein,
-            carb: form.carb,
-            veggies: form.veggies,
-            extraMeat: form.extraMeat,
-            extraVeggieOrCarb: form.extraVeggieOrCarb,
-            quantity: form.quantity,
-          },
-          pickup: pickupSummary,
-          payment: {
-            confirmed: form.paymentConfirmed,
-            reference: form.paymentReference,
-          },
-          pricing: {
-            perBowlTotal,
-            orderTotal,
-            lineItems: cartItems,
-          },
-          notes: form.notes,
-        }),
+        body: JSON.stringify(cartOrder),
       });
 
       if (!response.ok) {
-        throw new Error("Order submission failed");
+        throw new Error("Checkout preparation failed");
       }
 
-      setSubmitMessage("Paid order submitted successfully. We sent it to the store email.");
+      const data = (await response.json()) as { checkoutUrl?: string };
+
+      if (!data.checkoutUrl) {
+        throw new Error("Missing checkout URL");
+      }
+
+      window.location.href = data.checkoutUrl;
     } catch {
-      setSubmitMessage("Could not send order automatically. Please try again.");
+      setSubmitMessage("Could not start Clover checkout. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const renderSelectionCards = (
-    group: "protein" | "carb" | "veggies",
-    items: readonly string[],
-    icon: React.ReactNode
-  ) => {
+  const renderSelectionCards = (group: "protein" | "carb" | "veggies", items: readonly string[], icon: ReactNode) => {
     return (
       <div className="selection-group">
         <p className="selection-title">
@@ -179,7 +213,7 @@ export function MealPrepForm() {
   };
 
   return (
-    <form className="card form-grid" onSubmit={onSubmit}>
+    <form className="card form-grid" onSubmit={(event) => event.preventDefault()}>
       <h2>Build Your Bowl</h2>
       <p className="muted">{mealData.cutoffText}</p>
 
@@ -190,6 +224,17 @@ export function MealPrepForm() {
           value={form.name}
           onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
           placeholder="Your name"
+        />
+      </label>
+
+      <label>
+        Email
+        <input
+          required
+          type="email"
+          value={form.email}
+          onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+          placeholder="you@example.com"
         />
       </label>
 
@@ -282,6 +327,16 @@ export function MealPrepForm() {
         </label>
       </fieldset>
 
+      <label>
+        Notes
+        <textarea
+          value={form.notes}
+          onChange={(event) => setForm((prev) => ({ ...prev, notes: event.target.value }))}
+          placeholder="Optional notes"
+          rows={3}
+        />
+      </label>
+
       <section className="cart-review" aria-live="polite">
         <h3>
           <ShoppingCart size={16} aria-hidden="true" /> Review Cart
@@ -304,65 +359,25 @@ export function MealPrepForm() {
         </div>
       </section>
 
-      <fieldset className="inline-options">
-        <legend>Payment (Pay Before Submit)</legend>
+      <div className="cart-actions">
+        <button type="button" className="btn btn-secondary" onClick={onAddToCart}>
+          <ShoppingCart size={16} aria-hidden="true" /> Add / Update Cart
+        </button>
+        <button
+          type="button"
+          disabled={!cartOrder || !siteData.clover.orderUrl || isSubmitting}
+          className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
+          aria-disabled={!cartOrder || !siteData.clover.orderUrl || isSubmitting}
+          onClick={onCheckout}
+        >
+          <CircleDollarSign size={16} aria-hidden="true" />
+          {isSubmitting ? "Redirecting to Clover..." : "Proceed to Clover Checkout"}
+        </button>
+      </div>
 
-        {siteData.clover.orderUrl ? (
-          <p>
-            <a href={siteData.clover.orderUrl} target="_blank" rel="noreferrer" className="btn btn-secondary">
-              <CircleDollarSign size={16} aria-hidden="true" /> Pay with Clover
-            </a>
-          </p>
-        ) : (
-          <p className="muted">Add your Clover payment/order URL in site-data to enable direct payment link.</p>
-        )}
-
-        <label>
-          Payment Reference / Receipt ID
-          <input
-            required
-            value={form.paymentReference}
-            onChange={(event) => setForm((prev) => ({ ...prev, paymentReference: event.target.value }))}
-            placeholder="Enter payment confirmation number"
-          />
-        </label>
-
-        <label>
-          <input
-            type="checkbox"
-            checked={form.paymentConfirmed}
-            onChange={(event) => setForm((prev) => ({ ...prev, paymentConfirmed: event.target.checked }))}
-            required
-          />
-          I completed payment before placing this order.
-        </label>
-      </fieldset>
-
-      <label>
-        Notes
-        <textarea
-          value={form.notes}
-          onChange={(event) => setForm((prev) => ({ ...prev, notes: event.target.value }))}
-          placeholder="Optional notes"
-          rows={3}
-        />
-      </label>
-
-      {!isPaymentReady ? (
-        <p className="muted">Pay and confirm receipt/reference to unlock order submission.</p>
-      ) : null}
+      {!siteData.clover.orderUrl ? <p className="muted">Add Clover order URL in site data to enable checkout redirect.</p> : null}
 
       {submitMessage ? <p className="submit-message">{submitMessage}</p> : null}
-
-      <button
-        type="submit"
-        disabled={!isPaymentReady || isSubmitting}
-        className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
-        aria-disabled={!isPaymentReady || isSubmitting}
-      >
-        <ShoppingCart size={16} aria-hidden="true" />
-        {isSubmitting ? "Sending Paid Order..." : isPaymentReady ? "Submit Paid Order" : "Pay First to Submit"}
-      </button>
     </form>
   );
 }
