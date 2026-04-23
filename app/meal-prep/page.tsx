@@ -31,7 +31,7 @@ export default function MealPrepPage() {
           <h3>Veggies</h3>
           <p>{siteData.mealPrep.veggies.join(", ")}</p>
 
-          <p className="muted">Orders submit through your email app for now. Update order email in the editable data file.</p>
+          <p className="muted">Orders submit through your email app after payment confirmation and payment reference are provided.</p>
           {siteData.clover.enabled ? (
             <p>
               Prefer Clover? <Link href="/order">Use Clover ordering</Link>.

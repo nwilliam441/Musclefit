@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { Beef, Check, Clock3, Leaf, Plus, ShoppingCart, Wheat } from "lucide-react";
+import { Beef, Check, CircleDollarSign, Clock3, Leaf, Plus, ShoppingCart, Wheat } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 
 type OrderFormState = {
@@ -16,6 +16,8 @@ type OrderFormState = {
   pickupTime: string;
   extraMeat: boolean;
   extraVeggieOrCarb: boolean;
+  paymentConfirmed: boolean;
+  paymentReference: string;
   notes: string;
 };
 
@@ -41,6 +43,8 @@ export function MealPrepForm() {
     pickupTime: "",
     extraMeat: false,
     extraVeggieOrCarb: false,
+    paymentConfirmed: false,
+    paymentReference: "",
     notes: "",
   });
 
@@ -62,6 +66,11 @@ export function MealPrepForm() {
       return;
     }
 
+    if (!form.paymentConfirmed || !form.paymentReference.trim()) {
+      alert("Payment must be completed first. Add your payment reference before submitting.");
+      return;
+    }
+
     const pickupSummary =
       form.pickupType === "asap"
         ? "Earliest available pickup"
@@ -79,6 +88,8 @@ export function MealPrepForm() {
         `Extra veggie/carb: ${form.extraVeggieOrCarb ? "Yes" : "No"}`,
         `Quantity: ${form.quantity}`,
         pickupSummary,
+        `Payment confirmed: ${form.paymentConfirmed ? "Yes" : "No"}`,
+        `Payment reference: ${form.paymentReference}`,
         `Estimated total: ${formatCurrency(orderTotal)}`,
         `Notes: ${form.notes || "N/A"}`,
       ].join("\n")
@@ -226,6 +237,39 @@ export function MealPrepForm() {
             onChange={(event) => setForm((prev) => ({ ...prev, extraVeggieOrCarb: event.target.checked }))}
           />
           <Plus size={15} aria-hidden="true" /> Extra veggie/carb (+{formatCurrency(mealData.modifiers.extraVeggieOrCarb)})
+        </label>
+      </fieldset>
+
+      <fieldset className="inline-options">
+        <legend>Payment (Required Before Submit)</legend>
+        {siteData.clover.orderUrl ? (
+          <p>
+            <a href={siteData.clover.orderUrl} target="_blank" rel="noreferrer" className="btn btn-secondary">
+              <CircleDollarSign size={16} aria-hidden="true" /> Pay with Clover
+            </a>
+          </p>
+        ) : (
+          <p className="muted">Add your Clover payment/order URL in site-data to enable direct payment link.</p>
+        )}
+
+        <label>
+          Payment Reference / Receipt ID
+          <input
+            required
+            value={form.paymentReference}
+            onChange={(event) => setForm((prev) => ({ ...prev, paymentReference: event.target.value }))}
+            placeholder="Enter payment confirmation number"
+          />
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={form.paymentConfirmed}
+            onChange={(event) => setForm((prev) => ({ ...prev, paymentConfirmed: event.target.checked }))}
+            required
+          />
+          I completed payment before placing this order.
         </label>
       </fieldset>
 
