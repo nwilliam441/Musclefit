@@ -31,6 +31,7 @@ const formatCurrency = (value: number) =>
 
 export function MealPrepForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState<OrderFormState>({
     name: "",
     phone: "",
@@ -49,6 +50,7 @@ export function MealPrepForm() {
   });
 
   const isPaymentReady = form.paymentConfirmed && Boolean(form.paymentReference.trim());
+  const isSubmitUnlocked = paymentStep === 3 && isPaymentReady;
 
   const perBowlTotal = useMemo(() => {
     const salmonCost = form.protein === "Salmon" ? mealData.modifiers.salmonUpcharge : 0;
@@ -244,9 +246,31 @@ export function MealPrepForm() {
 
       <fieldset className="inline-options">
         <legend>Payment (Required Before Submit)</legend>
+
+        <div className="payment-stepper" role="list" aria-label="Payment steps">
+          <div className={`payment-step${paymentStep >= 1 ? " active" : ""}${paymentStep > 1 ? " done" : ""}`} role="listitem">
+            <strong>1</strong>
+            <span>Pay</span>
+          </div>
+          <div className={`payment-step${paymentStep >= 2 ? " active" : ""}${paymentStep > 2 ? " done" : ""}`} role="listitem">
+            <strong>2</strong>
+            <span>Confirm Receipt</span>
+          </div>
+          <div className={`payment-step${paymentStep >= 3 ? " active" : ""}${isSubmitUnlocked ? " done" : ""}`} role="listitem">
+            <strong>3</strong>
+            <span>Submit Order</span>
+          </div>
+        </div>
+
         {siteData.clover.orderUrl ? (
           <p>
-            <a href={siteData.clover.orderUrl} target="_blank" rel="noreferrer" className="btn btn-secondary">
+            <a
+              href={siteData.clover.orderUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-secondary"
+              onClick={() => setPaymentStep(2)}
+            >
               <CircleDollarSign size={16} aria-hidden="true" /> Pay with Clover
             </a>
           </p>
@@ -254,10 +278,17 @@ export function MealPrepForm() {
           <p className="muted">Add your Clover payment/order URL in site-data to enable direct payment link.</p>
         )}
 
+        {paymentStep === 1 ? (
+          <button type="button" className="btn btn-secondary" onClick={() => setPaymentStep(2)}>
+            I Paid, Continue
+          </button>
+        ) : null}
+
         <label>
           Payment Reference / Receipt ID
           <input
             required
+            disabled={paymentStep < 2}
             value={form.paymentReference}
             onChange={(event) => setForm((prev) => ({ ...prev, paymentReference: event.target.value }))}
             placeholder="Enter payment confirmation number"
@@ -267,12 +298,30 @@ export function MealPrepForm() {
         <label>
           <input
             type="checkbox"
+            disabled={paymentStep < 2}
             checked={form.paymentConfirmed}
             onChange={(event) => setForm((prev) => ({ ...prev, paymentConfirmed: event.target.checked }))}
             required
           />
           I completed payment before placing this order.
         </label>
+
+        {paymentStep === 2 ? (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => {
+              if (!isPaymentReady) {
+                alert("Enter receipt/reference and confirm payment to continue.");
+                return;
+              }
+
+              setPaymentStep(3);
+            }}
+          >
+            Continue to Final Submit
+          </button>
+        ) : null}
       </fieldset>
 
       <label>
@@ -290,18 +339,18 @@ export function MealPrepForm() {
         <p className="total">Total: {formatCurrency(orderTotal)}</p>
       </div>
 
-      {!isPaymentReady ? (
-        <p className="muted">Complete payment and add your receipt/reference to unlock final order submit.</p>
+      {!isSubmitUnlocked ? (
+        <p className="muted">Complete steps 1 and 2 to unlock final order submit.</p>
       ) : null}
 
       <button
         type="submit"
-        disabled={!isPaymentReady}
+        disabled={!isSubmitUnlocked}
         className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
-        aria-disabled={!isPaymentReady}
+        aria-disabled={!isSubmitUnlocked}
       >
         <ShoppingCart size={16} aria-hidden="true" />
-        {isSubmitting ? "Preparing Order..." : isPaymentReady ? "Submit Paid Order by Email" : "Pay First to Submit"}
+        {isSubmitting ? "Preparing Order..." : isSubmitUnlocked ? "Submit Paid Order by Email" : "Complete Payment Steps First"}
       </button>
     </form>
   );
