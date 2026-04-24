@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Plus, ShoppingCart } from "lucide-react";
+import { Check, Clock3, Plus, ShoppingCart } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 
 type AcaiFormState = {
@@ -9,6 +9,10 @@ type AcaiFormState = {
   email: string;
   phone: string;
   quantity: number;
+  pickupType: "asap" | "scheduled";
+  pickupDate: string;
+  pickupTime: string;
+  includeHoney: boolean;
   toppings: string[];
   notes: string;
 };
@@ -28,6 +32,10 @@ export function AcaiForm() {
     email: "",
     phone: "",
     quantity: 1,
+    pickupType: "asap",
+    pickupDate: "",
+    pickupTime: "",
+    includeHoney: true,
     toppings: [],
     notes: "",
   });
@@ -54,6 +62,11 @@ export function AcaiForm() {
   const onSavePreview = () => {
     if (!form.name || !form.email || !form.phone) {
       setSubmitMessage("Add name, email, and phone to save your bowl preview.");
+      return;
+    }
+
+    if (form.pickupType === "scheduled" && (!form.pickupDate || !form.pickupTime)) {
+      setSubmitMessage("Choose a pickup date and time to save your bowl preview.");
       return;
     }
 
@@ -107,6 +120,63 @@ export function AcaiForm() {
           onChange={(event) => setForm((prev) => ({ ...prev, quantity: Math.max(1, Number(event.target.value || 1)) }))}
         />
       </label>
+
+      <fieldset className="inline-options">
+        <legend>Pickup Option</legend>
+        <label>
+          <input
+            type="radio"
+            name="pickup"
+            checked={form.pickupType === "asap"}
+            onChange={() => setForm((prev) => ({ ...prev, pickupType: "asap" }))}
+          />
+          <Clock3 size={15} aria-hidden="true" /> Pickup now
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="pickup"
+            checked={form.pickupType === "scheduled"}
+            onChange={() => setForm((prev) => ({ ...prev, pickupType: "scheduled" }))}
+          />
+          <Clock3 size={15} aria-hidden="true" /> Set a time
+        </label>
+      </fieldset>
+
+      {form.pickupType === "scheduled" ? (
+        <div className="pickup-grid">
+          <label>
+            Pickup Date
+            <input
+              type="date"
+              value={form.pickupDate}
+              onChange={(event) => setForm((prev) => ({ ...prev, pickupDate: event.target.value }))}
+              required
+            />
+          </label>
+          <label>
+            Pickup Time
+            <input
+              type="time"
+              value={form.pickupTime}
+              onChange={(event) => setForm((prev) => ({ ...prev, pickupTime: event.target.value }))}
+              required
+            />
+          </label>
+        </div>
+      ) : null}
+
+      <fieldset className="inline-options">
+        <legend>Finish</legend>
+        <label>
+          <input
+            type="checkbox"
+            checked={form.includeHoney}
+            onChange={(event) => setForm((prev) => ({ ...prev, includeHoney: event.target.checked }))}
+          />
+          Honey drizzle
+        </label>
+      </fieldset>
 
       <div className="selection-group">
         <p className="selection-title">
@@ -166,6 +236,14 @@ export function AcaiForm() {
           <li>
             <span>Quantity</span>
             <span>x{form.quantity}</span>
+          </li>
+          <li>
+            <span>Pickup</span>
+            <span>{form.pickupType === "asap" ? "Pickup now" : form.pickupDate && form.pickupTime ? `${form.pickupDate} ${form.pickupTime}` : "Set a time"}</span>
+          </li>
+          <li>
+            <span>Honey</span>
+            <span>{form.includeHoney ? "Add honey" : "No honey"}</span>
           </li>
         </ul>
         <div className="cart-totals">
