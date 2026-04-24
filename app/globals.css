@@ -948,6 +948,22 @@ input[type="radio"] {
     padding: 0.9rem;
   }
 
+  .landing-art-panel {
+    justify-items: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .landing-art-wrap {
+    width: min(100%, 360px);
+    margin-inline: auto;
+  }
+
+  .landing-mascot {
+    display: block;
+    margin-inline: auto;
+  }
+
   .landing-eyebrow,
   .landing-art-caption,
   .landing-copy {
