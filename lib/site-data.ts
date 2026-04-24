@@ -1,7 +1,7 @@
 export const siteData = {
   businessName: "Muscle Fit Irwin",
   tagline: "Fuel your workouts with clean meals and smoothies.",
-  phone: "PHONE_COMING_SOON",
+  phone: "909 278 1235",
   orderEmail: "EMAIL_COMING_SOON",
   instagramUrl: "https://instagram.com/MuscleFit_IrwinSmoothies",
   locationBlurb: "Inside the gym. Fast pickup. Built for training days.",
