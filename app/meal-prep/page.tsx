@@ -13,9 +13,8 @@ export default function MealPrepPage() {
         <p>{siteData.mealPrep.cutoffText}</p>
       </section>
 
-      <section className="section-grid two-col">
-        <MealPrepForm />
-        <aside className="card info-panel">
+      <section className="section-grid two-col meal-prep-layout">
+        <aside className="card info-panel meal-prep-pricing">
           <h2>Pricing</h2>
           <ul>
             <li>Base bowl: ${siteData.mealPrep.basePrice.toFixed(2)}</li>
@@ -42,8 +41,11 @@ export default function MealPrepPage() {
             </p>
           ) : (
             <p className="muted">Online checkout coming soon.</p>
-          ) : null}
+          )}
         </aside>
+        <div className="meal-prep-form-wrap">
+          <MealPrepForm />
+        </div>
       </section>
     </main>
   );
