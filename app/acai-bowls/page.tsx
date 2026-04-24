@@ -4,11 +4,15 @@ import { siteData } from "@/lib/site-data";
 
 export default function AcaiBowlsPage() {
   const hasCheckout = siteData.clover.enabled && Boolean(siteData.clover.orderUrl || siteData.clover.embedUrl);
-  const bannerBackground = `linear-gradient(120deg, rgba(8, 12, 18, 0.82), rgba(15, 20, 27, 0.72)), url(${siteData.acai.heroImage})`;
+  const bannerBackground = `linear-gradient(120deg, rgba(8, 12, 18, 0.58), rgba(15, 20, 27, 0.48)), url(${siteData.acai.heroImage})`;
+  const sectionBackground = "linear-gradient(120deg, rgba(8, 12, 18, 0.86), rgba(15, 20, 27, 0.76))";
 
   return (
     <main className="page-shell">
-      <section className="hero compact" style={{ backgroundImage: bannerBackground, backgroundPosition: "center", backgroundSize: "cover" }}>
+      <section
+        className="hero compact"
+        style={{ backgroundImage: bannerBackground, backgroundPosition: "center 28%", backgroundSize: "cover" }}
+      >
         <p className="eyebrow">Acai Bowls</p>
         <h1>Build it. Fuel it. Love it.</h1>
         <p>{siteData.acai.tagline}</p>
@@ -17,7 +21,7 @@ export default function AcaiBowlsPage() {
       <section
         className="section-grid two-col meal-prep-layout acai-overlay-layout"
         style={{
-          backgroundImage: `linear-gradient(120deg, rgba(8, 12, 18, 0.86), rgba(15, 20, 27, 0.7)), url(${siteData.acai.heroImage})`,
+          backgroundImage: sectionBackground,
         }}
       >
         <aside className="card info-panel meal-prep-pricing acai-overlay-card">
