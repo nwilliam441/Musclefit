@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { CircleDollarSign, ShoppingCart, Trash2 } from "lucide-react";
+import { CircleDollarSign, ShoppingCart } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 import type { CartEntry, UnifiedCart } from "@/lib/cart-types";
-import { clearStoredCart, readStoredCart, removeStoredCartItem } from "@/lib/cart-storage";
+import { readStoredCart } from "@/lib/cart-storage";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -70,22 +69,11 @@ export default function OrderPage() {
     }
   };
 
-  const summaryRows: Array<{ label: string; href: string; cartKey: keyof UnifiedCart; entry: CartEntry | undefined }> = [
-    { label: "Meal Prep", href: "/meal-prep", cartKey: "mealPrep", entry: cart.mealPrep },
-    { label: "Acai Bowl", href: "/acai-bowls", cartKey: "acai", entry: cart.acai },
-    { label: "Smoothies", href: "/smoothies", cartKey: "smoothie", entry: cart.smoothie },
+  const summaryRows: Array<{ label: string; entry: CartEntry | undefined }> = [
+    { label: "Meal Prep", entry: cart.mealPrep },
+    { label: "Acai Bowl", entry: cart.acai },
+    { label: "Smoothies", entry: cart.smoothie },
   ];
-
-  const removeItem = (key: keyof UnifiedCart) => {
-    setCart(removeStoredCartItem(key));
-    setSubmitMessage("");
-  };
-
-  const clearCart = () => {
-    clearStoredCart();
-    setCart({});
-    setSubmitMessage("");
-  };
 
   return (
     <main className="page-shell">
@@ -133,11 +121,7 @@ export default function OrderPage() {
           <h2>
             <ShoppingCart size={18} aria-hidden="true" /> Order Summary
           </h2>
-          <div className="summary-controls">
-            <Link href="/meal-prep" className="btn btn-secondary">Meal Prep</Link>
-            <Link href="/acai-bowls" className="btn btn-secondary">Acai</Link>
-            <Link href="/smoothies" className="btn btn-secondary">Smoothies</Link>
-          </div>
+          <p className="muted">Summary is read-only to avoid accidental taps.</p>
         </div>
 
         {summaryRows.every((r) => !r.entry) ? (
@@ -145,18 +129,10 @@ export default function OrderPage() {
             <p className="muted">Your cart is empty. Add items from meal prep, acai bowls, or smoothies first.</p>
           </div>
         ) : (
-          summaryRows.map(({ label, href, cartKey, entry }) =>
+          summaryRows.map(({ label, entry }) =>
             entry ? (
               <div key={label} className="summary-section">
-                <div className="summary-row-top">
-                  <p className="summary-label">{label}</p>
-                  <div className="summary-row-actions">
-                    <Link href={href} className="summary-link">Edit</Link>
-                    <button type="button" className="summary-remove" onClick={() => removeItem(cartKey)}>
-                      <Trash2 size={14} aria-hidden="true" /> Remove
-                    </button>
-                  </div>
-                </div>
+                <p className="summary-label">{label}</p>
                 <ul className="summary-line-items">
                   {entry.lineItems.map((item) => (
                     <li key={item.label}>
@@ -180,15 +156,6 @@ export default function OrderPage() {
       </section>
 
       <div className="cart-actions">
-        <button
-          type="button"
-          className="btn btn-secondary"
-          disabled={grandTotal === 0}
-          aria-disabled={grandTotal === 0}
-          onClick={clearCart}
-        >
-          Clear Cart
-        </button>
         <button
           type="button"
           className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
