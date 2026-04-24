@@ -3,7 +3,7 @@ export const siteData = {
   tagline: "Fuel your workouts with clean meals and smoothies.",
   phone: "PHONE_COMING_SOON",
   orderEmail: "EMAIL_COMING_SOON",
-  instagramUrl: "",
+  instagramUrl: "https://instagram.com/MuscleFit_IrwinSmoothies",
   locationBlurb: "Inside the gym. Fast pickup. Built for training days.",
   clover: {
     enabled: true,
