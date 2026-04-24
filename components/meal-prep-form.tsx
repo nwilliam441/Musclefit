@@ -17,21 +17,6 @@ type OrderFormState = {
   extraMeat: boolean;
   extraVeggieOrCarb: boolean;
   notes: string;
-  bowl: {
-    protein: string;
-    carb: string;
-    veggies: string;
-    extraMeat: boolean;
-    extraVeggieOrCarb: boolean;
-    quantity: number;
-  };
-  pickup: string;
-  pricing: {
-    perBowlTotal: number;
-    orderTotal: number;
-    lineItems: Array<{ label: string; amount: number }>;
-  };
-  notes: string;
 };
 
 const mealData = siteData.mealPrep;
