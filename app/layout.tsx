@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
 import { siteData } from "@/lib/site-data";
 import "./globals.css";
 
@@ -56,6 +57,7 @@ export default function RootLayout({
         <footer className="site-footer">
           <p>Muscle Fit Irwin</p>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
