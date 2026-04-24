@@ -29,6 +29,20 @@ Create `.env.local` from `.env.example` and set:
 
 Also set your Clover URL in `lib/site-data.ts` under `clover.orderUrl`.
 
+## Placeholder Mode (Launch Before Vendor Details)
+
+You can deploy now using placeholder values and enable live checkout later.
+
+1. Keep `clover.orderUrl` and `clover.embedUrl` empty in `lib/site-data.ts`.
+2. Use placeholder contact values in `lib/site-data.ts`.
+3. Copy `.env.example` to `.env.local` and keep temporary values until vendor credentials arrive.
+
+In this mode:
+
+- Meal prep form and cart work.
+- Checkout button is shown as coming soon.
+- Payment redirect and order emails stay disabled until real Clover and Resend details are set.
+
 ## Single Editable Menu Source
 
 Update all business/menu content in one file:

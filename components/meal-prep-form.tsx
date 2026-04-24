@@ -44,6 +44,7 @@ type CheckoutOrder = {
 };
 
 const mealData = siteData.mealPrep;
+const hasCheckoutUrl = Boolean(siteData.clover.orderUrl);
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -367,15 +368,19 @@ export function MealPrepForm() {
         </button>
         <button
           type="button"
-          disabled={!cartOrder || !siteData.clover.orderUrl || isSubmitting}
+          disabled={!cartOrder || !hasCheckoutUrl || isSubmitting}
           className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
-          aria-disabled={!cartOrder || !siteData.clover.orderUrl || isSubmitting}
+          aria-disabled={!cartOrder || !hasCheckoutUrl || isSubmitting}
           onClick={onCheckout}
         >
           <CircleDollarSign size={16} aria-hidden="true" />
-          {isSubmitting ? "Redirecting to Checkout..." : "Proceed to Checkout"}
+          {isSubmitting ? "Redirecting to Checkout..." : hasCheckoutUrl ? "Proceed to Checkout" : "Checkout Coming Soon"}
         </button>
       </div>
+
+      {!hasCheckoutUrl ? (
+        <p className="muted">You can still build and save the cart now. Live payment will be enabled once the Clover URL is provided.</p>
+      ) : null}
 
       {submitMessage ? <p className="submit-message">{submitMessage}</p> : null}
     </form>

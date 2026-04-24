@@ -3,6 +3,8 @@ import Link from "next/link";
 import { siteData } from "@/lib/site-data";
 
 export default function MealPrepPage() {
+  const hasCheckout = siteData.clover.enabled && Boolean(siteData.clover.orderUrl || siteData.clover.embedUrl);
+
   return (
     <main className="page-shell">
       <section className="hero compact">
@@ -31,11 +33,15 @@ export default function MealPrepPage() {
           <h3>Veggies</h3>
           <p>{siteData.mealPrep.veggies.join(", ")}</p>
 
-          <p className="muted">Build your bowl, add to cart, then continue to checkout. After payment, order and receipt emails are sent automatically.</p>
-          {siteData.clover.enabled ? (
+          <p className="muted">
+            Build your bowl and add to cart. Checkout and automatic order emails will go live as soon as vendor payment details are connected.
+          </p>
+          {hasCheckout ? (
             <p>
               Prefer checkout now? <Link href="/order">Open checkout page</Link>.
             </p>
+          ) : (
+            <p className="muted">Online checkout coming soon.</p>
           ) : null}
         </aside>
       </section>

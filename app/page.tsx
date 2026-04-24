@@ -3,6 +3,10 @@ import Link from "next/link";
 import { siteData } from "@/lib/site-data";
 
 export default function Home() {
+  const hasCheckout = siteData.clover.enabled && Boolean(siteData.clover.orderUrl || siteData.clover.embedUrl);
+  const hasPhone = /^\+?[\d\s().-]{7,}$/.test(siteData.phone);
+  const hasInstagram = siteData.instagramUrl.startsWith("http");
+
   return (
     <main className="page-shell">
       <section className="landing-hero">
@@ -29,7 +33,7 @@ export default function Home() {
               <Link href="/smoothies" className="btn btn-secondary">
                 View Smoothies
               </Link>
-              {siteData.clover.enabled && (siteData.clover.orderUrl || siteData.clover.embedUrl) ? (
+              {hasCheckout ? (
                 <Link href="/order" className="btn landing-btn-checkout">
                   Checkout
                 </Link>
@@ -70,14 +74,23 @@ export default function Home() {
         <article className="card landing-info-card">
           <div className="landing-info-line landing-line-cyan" />
           <h2>Contact</h2>
-          <p>
-            <a href={`tel:${siteData.phone}`}>Call: {siteData.phone}</a>
-          </p>
-          <p>
-            <a href={siteData.instagramUrl} target="_blank" rel="noreferrer">
-              Follow on Instagram
-            </a>
-          </p>
+          {hasPhone ? (
+            <p>
+              <a href={`tel:${siteData.phone}`}>Call: {siteData.phone}</a>
+            </p>
+          ) : (
+            <p className="muted">Phone number coming soon</p>
+          )}
+          {hasInstagram ? (
+            <p>
+              <a href={siteData.instagramUrl} target="_blank" rel="noreferrer">
+                Follow on Instagram
+              </a>
+            </p>
+          ) : (
+            <p className="muted">Instagram link coming soon</p>
+          )}
+          {!hasCheckout ? <p className="muted">Online checkout coming soon</p> : null}
         </article>
       </section>
     </main>
