@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Check, Clock3, Plus, ShoppingCart } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 import type { CartEntry } from "@/lib/cart-types";
+import { updateStoredCartItem } from "@/lib/cart-storage";
 
 type AcaiFormState = {
   name: string;
@@ -67,21 +68,12 @@ export function AcaiForm({ cartMode, onCartUpdate }: AcaiFormProps = {}) {
 
   const onSavePreview = () => {
     if (!cartMode) {
-      if (!form.name || !form.email || !form.phone) {
-        setSubmitMessage("Add name, email, and phone to save your bowl preview.");
-        return;
-      }
-
       if (form.pickupType === "scheduled" && (!form.pickupDate || !form.pickupTime)) {
-        setSubmitMessage("Choose a pickup date and time to save your bowl preview.");
+        setSubmitMessage("Choose a pickup date and time.");
         return;
       }
-
-      setSubmitMessage("Acai bowl saved. Checkout goes live when payment details are connected.");
-      return;
     }
 
-    // cartMode: add to order
     if (form.pickupType === "scheduled" && (!form.pickupDate || !form.pickupTime)) {
       setSubmitMessage("Choose a pickup date and time.");
       return;
@@ -102,7 +94,7 @@ export function AcaiForm({ cartMode, onCartUpdate }: AcaiFormProps = {}) {
       });
     }
 
-    onCartUpdate?.({
+    const cartEntry: CartEntry = {
       subtotal: orderTotal,
       lineItems,
       details: {
@@ -112,9 +104,12 @@ export function AcaiForm({ cartMode, onCartUpdate }: AcaiFormProps = {}) {
         pickup: pickupSummary,
         notes: form.notes,
       },
-    });
+    };
 
-    setSubmitMessage("Acai bowl added to order.");
+    updateStoredCartItem("acai", cartEntry);
+    onCartUpdate?.(cartEntry);
+
+    setSubmitMessage(cartMode ? "Acai bowl added to order." : "Acai bowl added to cart. Review it on the order page.");
   };
 
   return (
@@ -305,7 +300,7 @@ export function AcaiForm({ cartMode, onCartUpdate }: AcaiFormProps = {}) {
           {cartMode ? (
             <><ShoppingCart size={16} aria-hidden="true" /> Add to Order</>
           ) : (
-            "Save Bowl Preview"
+            <><ShoppingCart size={16} aria-hidden="true" /> Add to Cart</>
           )}
         </button>
       </div>

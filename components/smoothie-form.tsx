@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Check, Clock3, ShoppingCart } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 import type { CartEntry } from "@/lib/cart-types";
+import { updateStoredCartItem } from "@/lib/cart-storage";
 
 const smoothieData = siteData.smoothies;
 const allSmoothies = smoothieData.categories.flatMap((cat) =>
@@ -14,7 +15,7 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 
 type SmoothieFormProps = {
-  onCartUpdate: (entry: CartEntry) => void;
+  onCartUpdate?: (entry: CartEntry) => void;
 };
 
 export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
@@ -63,7 +64,7 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
         ? "Earliest available pickup"
         : `Scheduled pickup: ${pickupDate} at ${pickupTime}`;
 
-    onCartUpdate({
+    const cartEntry: CartEntry = {
       subtotal: orderTotal,
       lineItems,
       details: {
@@ -74,7 +75,10 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
         pickup: pickupSummary,
         notes,
       },
-    });
+    };
+
+    updateStoredCartItem("smoothie", cartEntry);
+    onCartUpdate?.(cartEntry);
 
     setAddedMessage("Smoothies added to order.");
   };

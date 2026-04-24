@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { Bolt, Cherry, Leaf } from "lucide-react";
+import { SmoothieForm } from "@/components/smoothie-form";
 import { siteData } from "@/lib/site-data";
 
 function getSmoothieIcon(ingredients: readonly string[]) {
@@ -16,6 +18,8 @@ function getSmoothieIcon(ingredients: readonly string[]) {
 }
 
 export default function SmoothiesPage() {
+  const hasCheckout = siteData.clover.enabled && Boolean(siteData.clover.orderUrl || siteData.clover.embedUrl);
+
   return (
     <main className="page-shell">
       <section className="hero compact">
@@ -59,6 +63,21 @@ export default function SmoothiesPage() {
         <p>
           <strong>$2:</strong> {siteData.smoothies.addons.twoDollar.join(", ")}
         </p>
+        {hasCheckout ? (
+          <p>
+            Added something? <Link href="/order">Review your order</Link>.
+          </p>
+        ) : null}
+      </section>
+
+      <section className="section-grid two-col meal-prep-layout">
+        <aside className="card info-panel meal-prep-pricing">
+          <h2>Build Your Smoothie</h2>
+          <p className="muted">Pick a smoothie, add extras, then review everything on the order page before checkout.</p>
+        </aside>
+        <div className="meal-prep-form-wrap">
+          <SmoothieForm />
+        </div>
       </section>
     </main>
   );

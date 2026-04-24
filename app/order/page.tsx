@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { CircleDollarSign, ShoppingCart } from "lucide-react";
-import { MealPrepForm } from "@/components/meal-prep-form";
-import { AcaiForm } from "@/components/acai-form";
-import { SmoothieForm } from "@/components/smoothie-form";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { CircleDollarSign, ShoppingCart, Trash2 } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 import type { CartEntry, UnifiedCart } from "@/lib/cart-types";
-
-type Tab = "meal-prep" | "acai" | "smoothie";
+import { clearStoredCart, readStoredCart, removeStoredCartItem } from "@/lib/cart-storage";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -16,16 +13,23 @@ const formatCurrency = (value: number) =>
 const hasCheckoutUrl = Boolean(siteData.clover.orderUrl);
 
 export default function OrderPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("meal-prep");
   const [cart, setCart] = useState<UnifiedCart>({});
   const [customer, setCustomer] = useState({ name: "", email: "", phone: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
 
-  const updateCart = (key: keyof UnifiedCart) => (entry: CartEntry) => {
-    setCart((prev) => ({ ...prev, [key]: entry }));
-    setSubmitMessage("");
-  };
+  useEffect(() => {
+    const syncCart = () => setCart(readStoredCart());
+
+    syncCart();
+    window.addEventListener("focus", syncCart);
+    window.addEventListener("storage", syncCart);
+
+    return () => {
+      window.removeEventListener("focus", syncCart);
+      window.removeEventListener("storage", syncCart);
+    };
+  }, []);
 
   const grandTotal =
     (cart.mealPrep?.subtotal ?? 0) + (cart.acai?.subtotal ?? 0) + (cart.smoothie?.subtotal ?? 0);
@@ -66,24 +70,29 @@ export default function OrderPage() {
     }
   };
 
-  const tabs: Array<{ id: Tab; label: string; cartKey: keyof UnifiedCart }> = [
-    { id: "meal-prep", label: "Meal Prep", cartKey: "mealPrep" },
-    { id: "acai", label: "Acai Bowl", cartKey: "acai" },
-    { id: "smoothie", label: "Smoothies", cartKey: "smoothie" },
+  const summaryRows: Array<{ label: string; href: string; cartKey: keyof UnifiedCart; entry: CartEntry | undefined }> = [
+    { label: "Meal Prep", href: "/meal-prep", cartKey: "mealPrep", entry: cart.mealPrep },
+    { label: "Acai Bowl", href: "/acai-bowls", cartKey: "acai", entry: cart.acai },
+    { label: "Smoothies", href: "/smoothies", cartKey: "smoothie", entry: cart.smoothie },
   ];
 
-  const summaryRows: Array<{ label: string; entry: CartEntry | undefined }> = [
-    { label: "Meal Prep", entry: cart.mealPrep },
-    { label: "Acai Bowl", entry: cart.acai },
-    { label: "Smoothies", entry: cart.smoothie },
-  ];
+  const removeItem = (key: keyof UnifiedCart) => {
+    setCart(removeStoredCartItem(key));
+    setSubmitMessage("");
+  };
+
+  const clearCart = () => {
+    clearStoredCart();
+    setCart({});
+    setSubmitMessage("");
+  };
 
   return (
     <main className="page-shell">
       <section className="hero compact">
         <p className="eyebrow">Order</p>
-        <h1>Build Your Order</h1>
-        <p>Add items from each tab, review your total, then check out in one step.</p>
+        <h1>Review Your Order</h1>
+        <p>This page is your cart review. Build meal prep, acai, and smoothie items on their own pages, then check out here.</p>
       </section>
 
       {/* Customer info */}
@@ -119,50 +128,35 @@ export default function OrderPage() {
         </label>
       </section>
 
-      {/* Tab navigation */}
-      <nav className="order-tabs" aria-label="Order categories">
-        {tabs.map(({ id, label, cartKey }) => {
-          const hasItem = Boolean(cart[cartKey]);
-          return (
-            <button
-              key={id}
-              type="button"
-              className={`tab-btn${activeTab === id ? " active" : ""}${hasItem ? " has-item" : ""}`}
-              onClick={() => setActiveTab(id)}
-            >
-              {label}
-              {hasItem ? <span className="tab-check" aria-label="added">✓</span> : null}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Tab panels */}
-      <div className="tab-panel">
-        {activeTab === "meal-prep" && (
-          <MealPrepForm cartMode onCartUpdate={updateCart("mealPrep")} />
-        )}
-        {activeTab === "acai" && (
-          <AcaiForm cartMode onCartUpdate={updateCart("acai")} />
-        )}
-        {activeTab === "smoothie" && (
-          <SmoothieForm onCartUpdate={updateCart("smoothie")} />
-        )}
-      </div>
-
-      {/* Order summary */}
       <section className="card order-summary" aria-live="polite">
-        <h2>
-          <ShoppingCart size={18} aria-hidden="true" /> Order Summary
-        </h2>
+        <div className="summary-header">
+          <h2>
+            <ShoppingCart size={18} aria-hidden="true" /> Order Summary
+          </h2>
+          <div className="summary-controls">
+            <Link href="/meal-prep" className="btn btn-secondary">Meal Prep</Link>
+            <Link href="/acai-bowls" className="btn btn-secondary">Acai</Link>
+            <Link href="/smoothies" className="btn btn-secondary">Smoothies</Link>
+          </div>
+        </div>
 
         {summaryRows.every((r) => !r.entry) ? (
-          <p className="muted">Add items from the tabs above to see your total.</p>
+          <div className="summary-empty-state">
+            <p className="muted">Your cart is empty. Add items from meal prep, acai bowls, or smoothies first.</p>
+          </div>
         ) : (
-          summaryRows.map(({ label, entry }) =>
+          summaryRows.map(({ label, href, cartKey, entry }) =>
             entry ? (
               <div key={label} className="summary-section">
-                <p className="summary-label">{label}</p>
+                <div className="summary-row-top">
+                  <p className="summary-label">{label}</p>
+                  <div className="summary-row-actions">
+                    <Link href={href} className="summary-link">Edit</Link>
+                    <button type="button" className="summary-remove" onClick={() => removeItem(cartKey)}>
+                      <Trash2 size={14} aria-hidden="true" /> Remove
+                    </button>
+                  </div>
+                </div>
                 <ul className="summary-line-items">
                   {entry.lineItems.map((item) => (
                     <li key={item.label}>
@@ -185,8 +179,16 @@ export default function OrderPage() {
         ) : null}
       </section>
 
-      {/* Checkout */}
       <div className="cart-actions">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          disabled={grandTotal === 0}
+          aria-disabled={grandTotal === 0}
+          onClick={clearCart}
+        >
+          Clear Cart
+        </button>
         <button
           type="button"
           className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}

@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Beef, Check, CircleDollarSign, Clock3, Leaf, Plus, ShoppingCart, Wheat } from "lucide-react";
 import { siteData } from "@/lib/site-data";
 import type { CartEntry } from "@/lib/cart-types";
+import { updateStoredCartItem } from "@/lib/cart-storage";
 
 type OrderFormState = {
   name: string;
@@ -151,19 +152,23 @@ export function MealPrepForm({ cartMode, onCartUpdate }: MealPrepFormProps = {})
 
     setCartOrder(nextOrder);
 
+    const cartEntry: CartEntry = {
+      subtotal: nextOrder.pricing.orderTotal,
+      lineItems: nextOrder.pricing.lineItems,
+      details: {
+        bowl: nextOrder.bowl,
+        pickup: nextOrder.pickup,
+        notes: nextOrder.notes,
+      },
+    };
+
+    updateStoredCartItem("mealPrep", cartEntry);
+
     if (cartMode && onCartUpdate) {
-      onCartUpdate({
-        subtotal: nextOrder.pricing.orderTotal,
-        lineItems: nextOrder.pricing.lineItems,
-        details: {
-          bowl: nextOrder.bowl,
-          pickup: nextOrder.pickup,
-          notes: nextOrder.notes,
-        },
-      });
+      onCartUpdate(cartEntry);
       setSubmitMessage("Meal prep added to order.");
     } else {
-      setSubmitMessage("Cart ready. Continue to checkout.");
+      setSubmitMessage("Meal prep added to cart. Review it on the order page.");
     }
   };
 
