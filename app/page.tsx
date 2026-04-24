@@ -13,7 +13,7 @@ export default function Home() {
         <div className="landing-hero-bg" />
         <div className="landing-hero-grid">
           <div className="landing-panel">
-            <p className="landing-eyebrow">Meal Prep + Smoothies</p>
+            <p className="landing-eyebrow">Meal Prep + Acai + Smoothies</p>
             <h1 className="landing-title">
               Fuel Your
               <br />
@@ -32,6 +32,9 @@ export default function Home() {
               </Link>
               <Link href="/smoothies" className="btn btn-secondary">
                 View Smoothies
+              </Link>
+              <Link href="/acai-bowls" className="btn btn-secondary">
+                Build Acai Bowl
               </Link>
               {hasCheckout ? (
                 <Link href="/order" className="btn landing-btn-checkout">
@@ -62,8 +65,8 @@ export default function Home() {
           <div className="landing-info-line landing-line-lime" />
           <h2>What We Offer</h2>
           <p>
-            Clean, gym-ready meal prep bowls and two focused smoothie menus designed for training performance and
-            consistency.
+            Clean, gym-ready meal prep bowls, made-to-order acai bowls, and two focused smoothie menus designed for
+            training performance and consistency.
           </p>
         </article>
         <article className="card landing-info-card">

@@ -38,6 +38,9 @@ export default function RootLayout({
                   <Link href="/meal-prep">Meal Prep</Link>
                 </li>
                 <li>
+                  <Link href="/acai-bowls">Acai Bowls</Link>
+                </li>
+                <li>
                   <Link href="/smoothies">Smoothies</Link>
                 </li>
                 {siteData.clover.enabled ? (

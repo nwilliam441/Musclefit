@@ -23,6 +23,14 @@ export const siteData = {
       extraVeggieOrCarb: 0.5,
     },
   },
+  acai: {
+    basePrice: 12.5,
+    includedToppings: 3,
+    extraToppingPrice: 0.25,
+    includesText: "All bowls come with a honey drizzle.",
+    tagline: "Fresh. Thick. Loaded. Made to order.",
+    toppings: ["Chia Seeds", "Granola", "Chocolate Chips", "Coconut Flakes", "Strawberries", "Bananas", "Blueberries"],
+  },
   smoothies: {
     size: "16 oz",
     price: 7.5,
