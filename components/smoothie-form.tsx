@@ -19,8 +19,9 @@ type SmoothieFormProps = {
 };
 
 export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
-  const [selected, setSelected] = useState(allSmoothies[0].name);
-  const [quantity, setQuantity] = useState(1);
+  const [smoothieQuantities, setSmoothieQuantities] = useState<Record<string, number>>({
+    [allSmoothies[0].name]: 1,
+  });
   const [addonsOne, setAddonsOne] = useState<string[]>([]);
   const [addonsTwo, setAddonsTwo] = useState<string[]>([]);
   const [pickupType, setPickupType] = useState<"asap" | "scheduled">("asap");
@@ -29,19 +30,44 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
   const [notes, setNotes] = useState("");
   const [addedMessage, setAddedMessage] = useState("");
 
-  const addonOneCost = addonsOne.length * 1;
-  const addonTwoCost = addonsTwo.length * 2;
-  const perSmoothieTotal = smoothieData.price + addonOneCost + addonTwoCost;
-  const orderTotal = perSmoothieTotal * quantity;
+  const selectedSmoothies = useMemo(
+    () => Object.entries(smoothieQuantities).filter(([, qty]) => qty > 0),
+    [smoothieQuantities],
+  );
+
+  const totalQuantity = useMemo(
+    () => selectedSmoothies.reduce((sum, [, qty]) => sum + qty, 0),
+    [selectedSmoothies],
+  );
+
+  const baseSmoothieCost = totalQuantity * smoothieData.price;
+  const addonOneCost = addonsOne.length * totalQuantity * 1;
+  const addonTwoCost = addonsTwo.length * totalQuantity * 2;
+  const orderTotal = baseSmoothieCost + addonOneCost + addonTwoCost;
 
   const lineItems = useMemo(() => {
-    const items: Array<{ label: string; amount: number }> = [
-      { label: `${selected} (${smoothieData.size})`, amount: smoothieData.price },
-    ];
-    addonsOne.forEach((a) => items.push({ label: a, amount: 1 }));
-    addonsTwo.forEach((a) => items.push({ label: a, amount: 2 }));
+    const items: Array<{ label: string; amount: number }> = selectedSmoothies.map(([name, qty]) => ({
+      label: `${name} (${smoothieData.size}) x${qty}`,
+      amount: smoothieData.price * qty,
+    }));
+
+    addonsOne.forEach((a) => items.push({ label: `${a} x${totalQuantity}`, amount: totalQuantity }));
+    addonsTwo.forEach((a) => items.push({ label: `${a} x${totalQuantity}`, amount: totalQuantity * 2 }));
     return items;
-  }, [selected, addonsOne, addonsTwo]);
+  }, [selectedSmoothies, addonsOne, addonsTwo, totalQuantity]);
+
+  const setSmoothieQty = (name: string, quantity: number) => {
+    setAddedMessage("");
+    setSmoothieQuantities((prev) => ({
+      ...prev,
+      [name]: Math.max(0, quantity),
+    }));
+  };
+
+  const toggleSmoothie = (name: string) => {
+    const current = smoothieQuantities[name] ?? 0;
+    setSmoothieQty(name, current > 0 ? 0 : 1);
+  };
 
   const toggleAddonOne = (addon: string) => {
     setAddedMessage("");
@@ -54,6 +80,11 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
   };
 
   const onAddToCart = () => {
+    if (totalQuantity === 0) {
+      setAddedMessage("Select at least one smoothie.");
+      return;
+    }
+
     if (pickupType === "scheduled" && (!pickupDate || !pickupTime)) {
       alert("Please select a pickup date and time.");
       return;
@@ -68,10 +99,10 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
       subtotal: orderTotal,
       lineItems,
       details: {
-        smoothie: selected,
+        smoothies: selectedSmoothies.map(([name, qty]) => ({ name, quantity: qty })),
         addonsOne,
         addonsTwo,
-        quantity,
+        totalQuantity,
         pickup: pickupSummary,
         notes,
       },
@@ -91,22 +122,20 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
       </p>
 
       <div className="selection-group">
-        <p className="selection-title">Choose a Smoothie</p>
+        <p className="selection-title">Choose One or More Smoothies</p>
         <div className="selection-grid" role="radiogroup" aria-label="smoothie selection">
           {allSmoothies.map((s) => {
-            const isSelected = selected === s.name;
+            const qty = smoothieQuantities[s.name] ?? 0;
+            const isSelected = qty > 0;
             return (
               <button
                 key={s.name}
                 type="button"
                 className={`selection-card${isSelected ? " selected" : ""}`}
-                onClick={() => {
-                  setSelected(s.name);
-                  setAddedMessage("");
-                }}
+                onClick={() => toggleSmoothie(s.name)}
                 aria-pressed={isSelected}
               >
-                <span>{s.name}</span>
+                <span>{s.name}{isSelected ? ` x${qty}` : ""}</span>
                 {isSelected ? <Check size={15} aria-hidden="true" /> : null}
               </button>
             );
@@ -114,18 +143,24 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
         </div>
       </div>
 
-      <label>
-        Quantity
-        <input
-          min={1}
-          type="number"
-          value={quantity}
-          onChange={(event) => {
-            setQuantity(Math.max(1, Number(event.target.value || 1)));
-            setAddedMessage("");
-          }}
-        />
-      </label>
+      {selectedSmoothies.length > 0 ? (
+        <div className="selection-group">
+          <p className="selection-title">Selected Quantities</p>
+          <div className="pickup-grid">
+            {selectedSmoothies.map(([name, qty]) => (
+              <label key={name}>
+                {name}
+                <input
+                  min={1}
+                  type="number"
+                  value={qty}
+                  onChange={(event) => setSmoothieQty(name, Math.max(1, Number(event.target.value || 1)))}
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <fieldset className="inline-options">
         <legend>Pickup Option</legend>
@@ -222,12 +257,12 @@ export function SmoothieForm({ onCartUpdate }: SmoothieFormProps) {
             </li>
           ))}
           <li>
-            <span>Quantity</span>
-            <span>x{quantity}</span>
+            <span>Total Smoothies</span>
+            <span>x{totalQuantity}</span>
           </li>
         </ul>
         <div className="cart-totals">
-          <p>Per smoothie: {formatCurrency(perSmoothieTotal)}</p>
+          <p>Base smoothies: {formatCurrency(baseSmoothieCost)}</p>
           <p className="total">Subtotal: {formatCurrency(orderTotal)}</p>
         </div>
       </section>
