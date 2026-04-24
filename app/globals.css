@@ -393,6 +393,25 @@ a {
   color: #9ca3af;
 }
 
+.acai-photo-card {
+  gap: 0.55rem;
+}
+
+.acai-photo-wrap {
+  margin-top: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0f141b;
+}
+
+.acai-photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
 .landing-info-grid {
   padding-bottom: 0.4rem;
 }
