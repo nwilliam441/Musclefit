@@ -114,6 +114,19 @@ export default function OrderPage() {
             placeholder="(555) 555-5555"
           />
         </label>
+
+        <div className="cart-actions">
+          <button
+            type="button"
+            className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
+            disabled={grandTotal === 0 || !hasCheckoutUrl || isSubmitting}
+            aria-disabled={grandTotal === 0 || !hasCheckoutUrl || isSubmitting}
+            onClick={() => void onCheckout()}
+          >
+            <CircleDollarSign size={16} aria-hidden="true" />
+            {isSubmitting ? "Redirecting to Checkout..." : hasCheckoutUrl ? "Proceed to Checkout" : "Checkout Coming Soon"}
+          </button>
+        </div>
       </section>
 
       <section className="card order-summary" aria-live="polite">
@@ -154,19 +167,6 @@ export default function OrderPage() {
           </div>
         ) : null}
       </section>
-
-      <div className="cart-actions">
-        <button
-          type="button"
-          className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
-          disabled={grandTotal === 0 || !hasCheckoutUrl || isSubmitting}
-          aria-disabled={grandTotal === 0 || !hasCheckoutUrl || isSubmitting}
-          onClick={() => void onCheckout()}
-        >
-          <CircleDollarSign size={16} aria-hidden="true" />
-          {isSubmitting ? "Redirecting to Checkout..." : hasCheckoutUrl ? "Proceed to Checkout" : "Checkout Coming Soon"}
-        </button>
-      </div>
 
       {!hasCheckoutUrl ? (
         <p className="muted">Live payment will be enabled once the Clover URL is configured.</p>
