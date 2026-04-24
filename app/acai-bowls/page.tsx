@@ -4,10 +4,11 @@ import { siteData } from "@/lib/site-data";
 
 export default function AcaiBowlsPage() {
   const hasCheckout = siteData.clover.enabled && Boolean(siteData.clover.orderUrl || siteData.clover.embedUrl);
+  const bannerBackground = `linear-gradient(120deg, rgba(8, 12, 18, 0.82), rgba(15, 20, 27, 0.72)), url(${siteData.acai.heroImage})`;
 
   return (
     <main className="page-shell">
-      <section className="hero compact">
+      <section className="hero compact" style={{ backgroundImage: bannerBackground, backgroundPosition: "center", backgroundSize: "cover" }}>
         <p className="eyebrow">Acai Bowls</p>
         <h1>Build it. Fuel it. Love it.</h1>
         <p>{siteData.acai.tagline}</p>

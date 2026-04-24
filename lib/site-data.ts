@@ -29,7 +29,7 @@ export const siteData = {
     extraToppingPrice: 0.25,
     includesText: "All bowls come with a honey drizzle.",
     tagline: "Fresh. Thick. Loaded. Made to order.",
-    heroImage: "/brand/smooth monster.png",
+    heroImage: "/brand/muscle fit acai bowl.png",
     heroAlt: "Acai bowls now available at Muscle Fit Irwin",
     toppings: ["Chia Seeds", "Granola", "Chocolate Chips", "Coconut Flakes", "Strawberries", "Bananas", "Blueberries"],
   },
