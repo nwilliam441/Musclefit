@@ -926,3 +926,122 @@ input[type="radio"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Order page tabs ──────────────────────────────────── */
+
+.order-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  flex: 1 1 auto;
+  min-width: 120px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.tab-btn:hover {
+  border-color: var(--accent-tan);
+  color: var(--text-main);
+}
+
+.tab-btn.active {
+  border-color: var(--accent-red);
+  color: var(--text-main);
+  background: rgba(255, 92, 173, 0.1);
+}
+
+.tab-btn.has-item {
+  border-color: var(--accent-green);
+}
+
+.tab-btn.active.has-item {
+  border-color: var(--accent-green);
+  background: rgba(180, 230, 29, 0.1);
+}
+
+.tab-check {
+  color: var(--accent-green);
+  font-size: 0.85rem;
+}
+
+.tab-panel > * {
+  animation: reveal-in 0.3s ease forwards;
+}
+
+/* ── Order summary ────────────────────────────────────── */
+
+.order-summary {
+  gap: 0.75rem;
+}
+
+.order-summary h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.summary-section {
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.summary-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+  color: var(--accent-tan);
+}
+
+.summary-line-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.summary-line-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.93rem;
+}
+
+.summary-subtotal {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.93rem;
+}
+
+.grand-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 2px solid var(--accent-green);
+  margin-top: 0.35rem;
+  padding-top: 0.6rem;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent-green);
+}

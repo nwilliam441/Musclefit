@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Check, Clock3, Plus, ShoppingCart } from "lucide-react";
 import { siteData } from "@/lib/site-data";
+import type { CartEntry } from "@/lib/cart-types";
 
 type AcaiFormState = {
   name: string;
@@ -19,13 +20,18 @@ type AcaiFormState = {
 
 const acaiData = siteData.acai;
 
+type AcaiFormProps = {
+  cartMode?: boolean;
+  onCartUpdate?: (entry: CartEntry) => void;
+};
+
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(value);
 
-export function AcaiForm() {
+export function AcaiForm({ cartMode, onCartUpdate }: AcaiFormProps = {}) {
   const [submitMessage, setSubmitMessage] = useState("");
   const [form, setForm] = useState<AcaiFormState>({
     name: "",
@@ -60,17 +66,55 @@ export function AcaiForm() {
   };
 
   const onSavePreview = () => {
-    if (!form.name || !form.email || !form.phone) {
-      setSubmitMessage("Add name, email, and phone to save your bowl preview.");
+    if (!cartMode) {
+      if (!form.name || !form.email || !form.phone) {
+        setSubmitMessage("Add name, email, and phone to save your bowl preview.");
+        return;
+      }
+
+      if (form.pickupType === "scheduled" && (!form.pickupDate || !form.pickupTime)) {
+        setSubmitMessage("Choose a pickup date and time to save your bowl preview.");
+        return;
+      }
+
+      setSubmitMessage("Acai bowl saved. Checkout goes live when payment details are connected.");
       return;
     }
 
+    // cartMode: add to order
     if (form.pickupType === "scheduled" && (!form.pickupDate || !form.pickupTime)) {
-      setSubmitMessage("Choose a pickup date and time to save your bowl preview.");
+      setSubmitMessage("Choose a pickup date and time.");
       return;
     }
 
-    setSubmitMessage("Acai bowl saved. Checkout goes live when payment details are connected.");
+    const pickupSummary =
+      form.pickupType === "asap"
+        ? "Earliest available pickup"
+        : `Scheduled pickup: ${form.pickupDate} at ${form.pickupTime}`;
+
+    const lineItems: Array<{ label: string; amount: number }> = [
+      { label: "Acai bowl", amount: acaiData.basePrice },
+    ];
+    if (extraToppingsCount > 0) {
+      lineItems.push({
+        label: `Extra toppings x${extraToppingsCount}`,
+        amount: extraToppingsCount * acaiData.extraToppingPrice,
+      });
+    }
+
+    onCartUpdate?.({
+      subtotal: orderTotal,
+      lineItems,
+      details: {
+        toppings: form.toppings,
+        includeHoney: form.includeHoney,
+        quantity: form.quantity,
+        pickup: pickupSummary,
+        notes: form.notes,
+      },
+    });
+
+    setSubmitMessage("Acai bowl added to order.");
   };
 
   return (
@@ -80,36 +124,40 @@ export function AcaiForm() {
         Includes {acaiData.includedToppings} toppings. Extra toppings are {formatCurrency(acaiData.extraToppingPrice)} each.
       </p>
 
-      <label>
-        Name
-        <input
-          required
-          value={form.name}
-          onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-          placeholder="Your name"
-        />
-      </label>
+      {!cartMode ? (
+        <>
+          <label>
+            Name
+            <input
+              required
+              value={form.name}
+              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+              placeholder="Your name"
+            />
+          </label>
 
-      <label>
-        Email
-        <input
-          required
-          type="email"
-          value={form.email}
-          onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-          placeholder="you@example.com"
-        />
-      </label>
+          <label>
+            Email
+            <input
+              required
+              type="email"
+              value={form.email}
+              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              placeholder="you@example.com"
+            />
+          </label>
 
-      <label>
-        Phone Number
-        <input
-          required
-          value={form.phone}
-          onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
-          placeholder="(555) 555-5555"
-        />
-      </label>
+          <label>
+            Phone Number
+            <input
+              required
+              value={form.phone}
+              onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+              placeholder="(555) 555-5555"
+            />
+          </label>
+        </>
+      ) : null}
 
       <label>
         Quantity
@@ -254,7 +302,11 @@ export function AcaiForm() {
 
       <div className="cart-actions">
         <button type="button" className="btn btn-primary" onClick={onSavePreview}>
-          Save Bowl Preview
+          {cartMode ? (
+            <><ShoppingCart size={16} aria-hidden="true" /> Add to Order</>
+          ) : (
+            "Save Bowl Preview"
+          )}
         </button>
       </div>
 

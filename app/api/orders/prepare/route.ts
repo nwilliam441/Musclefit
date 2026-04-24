@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { siteData } from "@/lib/site-data";
 import { createOrderToken } from "@/lib/order-token";
+import type { UnifiedCheckoutPayload } from "@/lib/cart-types";
 
-type CheckoutOrder = {
+// Legacy single-item checkout shape (used by individual form pages)
+type LegacyCheckoutOrder = {
   customer: {
     name: string;
     email: string;
@@ -25,6 +27,12 @@ type CheckoutOrder = {
   notes: string;
 };
 
+type IncomingPayload = LegacyCheckoutOrder | UnifiedCheckoutPayload;
+
+function isUnifiedPayload(payload: IncomingPayload): payload is UnifiedCheckoutPayload {
+  return "grandTotal" in payload;
+}
+
 function getOrigin(request: Request) {
   const origin = request.headers.get("origin");
   if (origin) {
@@ -41,7 +49,7 @@ function getOrigin(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const payload = (await request.json()) as CheckoutOrder;
+    const payload = (await request.json()) as IncomingPayload;
 
     if (!payload.customer?.name || !payload.customer?.email || !payload.customer?.phone) {
       return NextResponse.json({ error: "Missing customer information" }, { status: 400 });
@@ -51,11 +59,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Clover URL is not configured" }, { status: 500 });
     }
 
+    const orderTotal = isUnifiedPayload(payload)
+      ? payload.grandTotal
+      : payload.pricing.orderTotal;
+
     const orderToken = createOrderToken(payload);
 
     const cloverUrl = new URL(siteData.clover.orderUrl);
     cloverUrl.searchParams.set("order_token", orderToken);
-    cloverUrl.searchParams.set("amount", payload.pricing.orderTotal.toFixed(2));
+    cloverUrl.searchParams.set("amount", orderTotal.toFixed(2));
 
     const origin = getOrigin(request);
     if (origin) {

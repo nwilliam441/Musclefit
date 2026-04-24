@@ -3,6 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Beef, Check, CircleDollarSign, Clock3, Leaf, Plus, ShoppingCart, Wheat } from "lucide-react";
 import { siteData } from "@/lib/site-data";
+import type { CartEntry } from "@/lib/cart-types";
 
 type OrderFormState = {
   name: string;
@@ -46,13 +47,18 @@ type CheckoutOrder = {
 const mealData = siteData.mealPrep;
 const hasCheckoutUrl = Boolean(siteData.clover.orderUrl);
 
+type MealPrepFormProps = {
+  cartMode?: boolean;
+  onCartUpdate?: (entry: CartEntry) => void;
+};
+
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(value);
 
-export function MealPrepForm() {
+export function MealPrepForm({ cartMode, onCartUpdate }: MealPrepFormProps = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cartOrder, setCartOrder] = useState<CheckoutOrder | null>(null);
   const [submitMessage, setSubmitMessage] = useState("");
@@ -144,7 +150,21 @@ export function MealPrepForm() {
     }
 
     setCartOrder(nextOrder);
-    setSubmitMessage("Cart ready. Continue to checkout.");
+
+    if (cartMode && onCartUpdate) {
+      onCartUpdate({
+        subtotal: nextOrder.pricing.orderTotal,
+        lineItems: nextOrder.pricing.lineItems,
+        details: {
+          bowl: nextOrder.bowl,
+          pickup: nextOrder.pickup,
+          notes: nextOrder.notes,
+        },
+      });
+      setSubmitMessage("Meal prep added to order.");
+    } else {
+      setSubmitMessage("Cart ready. Continue to checkout.");
+    }
   };
 
   const onCheckout = async () => {
@@ -220,36 +240,40 @@ export function MealPrepForm() {
       <h2>Build Your Bowl</h2>
       <p className="muted">{mealData.cutoffText}</p>
 
-      <label>
-        Name
-        <input
-          required
-          value={form.name}
-          onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-          placeholder="Your name"
-        />
-      </label>
+      {!cartMode ? (
+        <>
+          <label>
+            Name
+            <input
+              required
+              value={form.name}
+              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+              placeholder="Your name"
+            />
+          </label>
 
-      <label>
-        Email
-        <input
-          required
-          type="email"
-          value={form.email}
-          onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-          placeholder="you@example.com"
-        />
-      </label>
+          <label>
+            Email
+            <input
+              required
+              type="email"
+              value={form.email}
+              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              placeholder="you@example.com"
+            />
+          </label>
 
-      <label>
-        Phone Number
-        <input
-          required
-          value={form.phone}
-          onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
-          placeholder="(555) 555-5555"
-        />
-      </label>
+          <label>
+            Phone Number
+            <input
+              required
+              value={form.phone}
+              onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+              placeholder="(555) 555-5555"
+            />
+          </label>
+        </>
+      ) : null}
 
       {renderSelectionCards("protein", mealData.proteins, <Beef size={16} aria-hidden="true" />)}
       {renderSelectionCards("carb", mealData.carbs, <Wheat size={16} aria-hidden="true" />)}
@@ -363,19 +387,21 @@ export function MealPrepForm() {
       </section>
 
       <div className="cart-actions">
-        <button type="button" className="btn btn-secondary" onClick={onAddToCart}>
-          <ShoppingCart size={16} aria-hidden="true" /> Add / Update Cart
+        <button type="button" className="btn btn-primary" onClick={onAddToCart}>
+          <ShoppingCart size={16} aria-hidden="true" /> {cartMode ? "Add to Order" : "Add / Update Cart"}
         </button>
-        <button
-          type="button"
-          disabled={!cartOrder || !hasCheckoutUrl || isSubmitting}
-          className={`btn btn-primary submit-btn${isSubmitting ? " is-loading" : ""}`}
-          aria-disabled={!cartOrder || !hasCheckoutUrl || isSubmitting}
-          onClick={onCheckout}
-        >
-          <CircleDollarSign size={16} aria-hidden="true" />
-          {isSubmitting ? "Redirecting to Checkout..." : hasCheckoutUrl ? "Proceed to Checkout" : "Checkout Coming Soon"}
-        </button>
+        {!cartMode ? (
+          <button
+            type="button"
+            disabled={!cartOrder || !hasCheckoutUrl || isSubmitting}
+            className={`btn btn-secondary submit-btn${isSubmitting ? " is-loading" : ""}`}
+            aria-disabled={!cartOrder || !hasCheckoutUrl || isSubmitting}
+            onClick={onCheckout}
+          >
+            <CircleDollarSign size={16} aria-hidden="true" />
+            {isSubmitting ? "Redirecting to Checkout..." : hasCheckoutUrl ? "Proceed to Checkout" : "Checkout Coming Soon"}
+          </button>
+        ) : null}
       </div>
 
       {!hasCheckoutUrl ? (

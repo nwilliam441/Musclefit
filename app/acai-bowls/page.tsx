@@ -4,27 +4,17 @@ import { siteData } from "@/lib/site-data";
 
 export default function AcaiBowlsPage() {
   const hasCheckout = siteData.clover.enabled && Boolean(siteData.clover.orderUrl || siteData.clover.embedUrl);
-  const bannerBackground = `linear-gradient(120deg, rgba(8, 12, 18, 0.58), rgba(15, 20, 27, 0.48)), url(${siteData.acai.heroImage})`;
-  const sectionBackground = "linear-gradient(120deg, rgba(8, 12, 18, 0.86), rgba(15, 20, 27, 0.76))";
 
   return (
     <main className="page-shell">
-      <section
-        className="hero compact"
-        style={{ backgroundImage: bannerBackground, backgroundPosition: "center 28%", backgroundSize: "cover" }}
-      >
+      <section className="hero compact">
         <p className="eyebrow">Acai Bowls</p>
         <h1>Build it. Fuel it. Love it.</h1>
         <p>{siteData.acai.tagline}</p>
       </section>
 
-      <section
-        className="section-grid two-col meal-prep-layout acai-overlay-layout"
-        style={{
-          backgroundImage: sectionBackground,
-        }}
-      >
-        <aside className="card info-panel meal-prep-pricing acai-overlay-card">
+      <section className="section-grid two-col meal-prep-layout">
+        <aside className="card info-panel meal-prep-pricing">
           <h2>Pricing</h2>
           <ul>
             <li>Acai bowl: ${siteData.acai.basePrice.toFixed(2)}</li>
