@@ -7,9 +7,6 @@ import type { CartEntry } from "@/lib/cart-types";
 import { updateStoredCartItem } from "@/lib/cart-storage";
 
 type AcaiFormState = {
-  name: string;
-  email: string;
-  phone: string;
   quantity: number;
   pickupType: "asap" | "scheduled";
   pickupDate: string;
@@ -35,9 +32,6 @@ const formatCurrency = (value: number) =>
 export function AcaiForm({ cartMode, onCartUpdate }: AcaiFormProps = {}) {
   const [submitMessage, setSubmitMessage] = useState("");
   const [form, setForm] = useState<AcaiFormState>({
-    name: "",
-    email: "",
-    phone: "",
     quantity: 1,
     pickupType: "asap",
     pickupDate: "",
@@ -118,41 +112,6 @@ export function AcaiForm({ cartMode, onCartUpdate }: AcaiFormProps = {}) {
       <p className="muted">
         Includes {acaiData.includedToppings} toppings. Extra toppings are {formatCurrency(acaiData.extraToppingPrice)} each.
       </p>
-
-      {!cartMode ? (
-        <>
-          <label>
-            Name
-            <input
-              required
-              value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-              placeholder="Your name"
-            />
-          </label>
-
-          <label>
-            Email
-            <input
-              required
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-              placeholder="you@example.com"
-            />
-          </label>
-
-          <label>
-            Phone Number
-            <input
-              required
-              value={form.phone}
-              onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
-              placeholder="(555) 555-5555"
-            />
-          </label>
-        </>
-      ) : null}
 
       <label>
         Quantity
