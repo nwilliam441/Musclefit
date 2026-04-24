@@ -393,23 +393,36 @@ a {
   color: #9ca3af;
 }
 
-.acai-photo-card {
-  gap: 0.55rem;
-}
-
-.acai-photo-wrap {
-  margin-top: 0.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+.acai-overlay-layout {
+  position: relative;
   overflow: hidden;
-  background: #0f141b;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-.acai-photo {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
+.acai-overlay-layout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 20% 15%, rgba(180, 230, 29, 0.16), transparent 40%);
+}
+
+.acai-overlay-layout > * {
+  position: relative;
+  z-index: 1;
+}
+
+.acai-overlay-card,
+.acai-overlay-layout .form-grid.card {
+  background: rgba(13, 18, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
 }
 
 .landing-info-grid {

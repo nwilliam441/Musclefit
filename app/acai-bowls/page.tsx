@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { AcaiForm } from "@/components/acai-form";
 import { siteData } from "@/lib/site-data";
 
@@ -14,25 +13,13 @@ export default function AcaiBowlsPage() {
         <p>{siteData.acai.tagline}</p>
       </section>
 
-      <section className="card acai-photo-card">
-        <p className="eyebrow">Now Selling</p>
-        <h2>Acai Bowls</h2>
-        <p className="muted">{siteData.acai.tagline}</p>
-        <div className="acai-photo-wrap">
-          <Image
-            src={siteData.acai.heroImage}
-            alt={siteData.acai.heroAlt}
-            width={1200}
-            height={1600}
-            className="acai-photo"
-            priority
-          />
-        </div>
-        <p className="muted">Tip: replace the image path in lib/site-data.ts when your final Acai poster photo is ready.</p>
-      </section>
-
-      <section className="section-grid two-col meal-prep-layout">
-        <aside className="card info-panel meal-prep-pricing">
+      <section
+        className="section-grid two-col meal-prep-layout acai-overlay-layout"
+        style={{
+          backgroundImage: `linear-gradient(120deg, rgba(8, 12, 18, 0.86), rgba(15, 20, 27, 0.7)), url(${siteData.acai.heroImage})`,
+        }}
+      >
+        <aside className="card info-panel meal-prep-pricing acai-overlay-card">
           <h2>Pricing</h2>
           <ul>
             <li>Acai bowl: ${siteData.acai.basePrice.toFixed(2)}</li>
